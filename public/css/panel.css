@@ -1,9 +1,13 @@
 :root {
   --wallpaper-url: none;
-  --bg-card: rgba(12, 14, 28, 0.45);
-  --bg-card-raised: rgba(12, 14, 28, 0.55);
-  --accent-hover: #9a82ff;
-  --accent-glow: rgba(124, 92, 255, 0.3);
+  --bg-main: #000000;
+  --glass-tint: 0, 0, 0;
+  --bg-card: rgba(8, 8, 18, 0.62);
+  --bg-card-raised: rgba(14, 13, 28, 0.72);
+  --glass-border: rgba(208, 0, 0, 0.24);
+  --accent: #d00000;
+  --accent-hover: #f01818;
+  --accent-glow: rgba(208, 0, 0, 0.34);
 }
 
 html {
@@ -1708,5 +1712,112 @@ body {
 
   .auth-shell .card {
     padding-inline: 14px;
+  }
+}
+
+
+/* Screenshot-matched black glass / red accent theme */
+body {
+  background: #000;
+}
+
+.sidebar {
+  background: rgba(0, 0, 0, 0.82);
+  border-right-color: rgba(208, 0, 0, 0.2);
+}
+
+.top-header {
+  background: rgba(4, 4, 11, 0.72);
+  border-bottom-color: rgba(208, 0, 0, 0.18);
+}
+
+.card,
+.section-card,
+.profile-card-large {
+  background: linear-gradient(135deg, rgba(18, 16, 34, 0.78), rgba(5, 6, 14, 0.88));
+  border-color: rgba(208, 0, 0, 0.36);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.card-toolbar,
+.section-header {
+  background: rgba(4, 4, 11, 0.22);
+  border-bottom-color: rgba(208, 0, 0, 0.16);
+}
+
+.btn-primary {
+  background: #d00000;
+  border-color: rgba(255, 95, 95, 0.42);
+  box-shadow: 0 5px 18px rgba(208, 0, 0, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #f01818;
+  box-shadow: 0 7px 24px rgba(208, 0, 0, 0.35);
+}
+
+.btn-ghost,
+.input,
+select.input,
+textarea.input {
+  background: rgba(10, 10, 20, 0.72);
+  border-color: rgba(117, 122, 151, 0.28);
+}
+
+.input:focus,
+#view-account #emailInput:focus,
+#view-account #bioInput:focus {
+  border-color: #d00000;
+  box-shadow: 0 0 0 3px rgba(208, 0, 0, 0.18), 0 0 20px rgba(208, 0, 0, 0.14);
+}
+
+.nav-item.active {
+  color: #fff;
+  border-left-color: #d00000;
+  background: rgba(208, 0, 0, 0.12);
+}
+
+.nav-item.active svg,
+#view-account .section-header svg,
+.admin-section-badge {
+  color: #d00000;
+}
+
+#view-account .section-card {
+  background: linear-gradient(135deg, rgba(18, 16, 34, 0.78), rgba(5, 6, 14, 0.88));
+  border-color: rgba(208, 0, 0, 0.36);
+}
+
+#view-account .profile-card-large {
+  background: linear-gradient(145deg, rgba(12, 11, 22, 0.76), rgba(0, 0, 0, 0.88));
+}
+
+#view-account .section-header,
+#view-account .section-body {
+  color: var(--text-primary);
+}
+
+#view-account .form-label,
+#view-account .form-hint,
+#view-account .profile-email,
+#view-account .profile-stat-label {
+  color: #f0f1f7;
+}
+
+#view-account .profile-stat-value,
+#view-account .profile-name-large {
+  color: #fff;
+}
+
+.settings-tab.active {
+  color: #fff;
+  border-color: rgba(208, 0, 0, 0.72);
+  background: rgba(208, 0, 0, 0.18);
+  box-shadow: 0 0 0 1px rgba(208, 0, 0, 0.18), 0 0 20px rgba(208, 0, 0, 0.14);
+}
+
+@media (max-width: 900px) {
+  #view-account .account-layout {
+    grid-template-columns: 1fr;
   }
 }
