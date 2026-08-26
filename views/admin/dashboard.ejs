@@ -2681,6 +2681,56 @@
         font-size: 11px;
       }
 
+      .music-player-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: -6px 0 16px;
+        padding: 8px;
+        border: 1px solid rgba(137, 148, 176, 0.14);
+        border-radius: 999px;
+        background: rgba(5, 7, 18, 0.46);
+      }
+
+      .music-transport-btn {
+        display: inline-grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        padding: 0;
+        border: 1px solid rgba(137, 148, 176, 0.16);
+        border-radius: 50%;
+        color: var(--text-dim);
+        background: rgba(255, 255, 255, 0.035);
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+      }
+
+      .music-transport-btn:hover {
+        transform: translateY(-1px);
+        border-color: rgba(155, 140, 255, 0.68);
+        color: #fff;
+        background: rgba(92, 75, 246, 0.2);
+      }
+
+      .music-transport-btn.primary {
+        width: 42px;
+        height: 42px;
+        border-color: rgba(155, 140, 255, 0.7);
+        color: #fff;
+        background: linear-gradient(145deg, #7867ff, #4a3bd4);
+        box-shadow: 0 8px 22px rgba(92, 75, 246, 0.32);
+      }
+
+      .music-transport-btn[aria-pressed="true"] {
+        border-color: rgba(155, 140, 255, 0.76);
+        color: #fff;
+        background: rgba(92, 75, 246, 0.26);
+      }
+
       .music-track-list {
         display: grid;
         gap: 8px;
@@ -2721,6 +2771,19 @@
         display: block;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+
+      .music-track-art {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        place-items: center;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, rgba(120, 103, 255, 0.96), rgba(34, 37, 72, 0.9));
+        box-shadow: 0 0 16px rgba(92, 75, 246, 0.22);
+        font-size: 16px;
       }
 
       .music-track-source {
@@ -2883,6 +2946,20 @@
       }
 
       @media (max-width: 600px) {
+        .music-player-strip {
+          justify-content: space-between;
+        }
+
+        .music-transport-btn {
+          width: 32px;
+          height: 32px;
+        }
+
+        .music-transport-btn.primary {
+          width: 40px;
+          height: 40px;
+        }
+
         .music-add-row {
           grid-template-columns: 1fr;
         }
@@ -3682,6 +3759,12 @@
                       <div class="music-now-meta" id="musicNowMeta">Add a track to begin playback.</div>
                     </div>
                   </div>
+                  <div class="music-player-strip" aria-label="Music player controls">
+                    <button class="music-transport-btn" type="button" onclick="skipMusicTrack(-1)" aria-label="Previous track" title="Previous track">◀◀</button>
+                    <button class="music-transport-btn primary" type="button" onclick="toggleMusicPlayback()" id="musicTransportPlayBtn" aria-label="Play selected track" title="Play selected track">▶</button>
+                    <button class="music-transport-btn" type="button" onclick="skipMusicTrack(1)" aria-label="Next track" title="Next track">▶▶</button>
+                    <button class="music-transport-btn" type="button" onclick="toggleMusicMute()" id="musicMuteBtn" aria-label="Mute music" title="Mute music">🔊</button>
+                  </div>
                   <div class="music-track-list" id="musicTrackList" aria-live="polite">
                     <div class="music-empty">No music tracks yet.</div>
                   </div>
@@ -3727,7 +3810,7 @@
                   <p class="music-note">For production, use audio you own or have permission to stream. Uploaded tracks are stored under <code>media/music/</code>.</p>
                 </section>
               </div>
-              <audio id="musicAudio" preload="metadata"></audio>
+              <audio id="musicAudio" preload="metadata" onplay="syncMusicControls()" onpause="syncMusicControls()" onended="syncMusicControls()" onvolumechange="syncMusicControls()"></audio>
             </div>
           </div>
         </section>
@@ -4335,6 +4418,7 @@
       let wallpaperCategory = "all";
       let musicSettingsLoaded = false;
       let musicSettings = { enabled: false, autoplay: false, loop: true, volume: 0.35, selectedTrackId: "", tracks: [] };
+      let musicVolumeBeforeMute = null;
       let generalSettingsLoaded = false;
       let generalSettings = { panelName: "BT PANEL", panelSubtitle: "Control center", welcomeTitle: "Welcome", welcomeMessage: "Manage your panel from one place." };
       let barsSettingsLoaded = false;
@@ -4545,6 +4629,10 @@
         tracks.forEach((track) => {
           const row = document.createElement("div");
           row.className = `music-track-row${track.id === musicSettings.selectedTrackId ? " selected" : ""}`;
+          const art = document.createElement("span");
+          art.className = "music-track-art";
+          art.setAttribute("aria-hidden", "true");
+          art.textContent = "♫";
           const select = document.createElement("button");
           select.type = "button";
           select.className = "music-track-select";
@@ -4570,7 +4658,7 @@
           remove.setAttribute("aria-label", `Delete ${track.name || "track"}`);
           remove.textContent = "×";
           remove.addEventListener("click", () => deleteMusicTrack(track.id));
-          row.append(select, play, remove);
+          row.append(art, select, play, remove);
           list.appendChild(row);
         });
         updateMusicNowPlaying();
@@ -4589,8 +4677,24 @@
         const volumeLabel = document.getElementById("musicVolumeValue");
         if (volumeLabel) volumeLabel.textContent = `${value}%`;
         const audio = document.getElementById("musicAudio");
+        const playing = audio && !audio.paused && !audio.ended;
         const playButton = document.getElementById("musicPlayBtn");
-        if (playButton) playButton.textContent = audio && !audio.paused && !audio.ended ? "Pause selected" : "Play selected";
+        const transportPlayButton = document.getElementById("musicTransportPlayBtn");
+        if (playButton) playButton.textContent = playing ? "Pause selected" : "Play selected";
+        if (transportPlayButton) {
+          transportPlayButton.textContent = playing ? "❚❚" : "▶";
+          transportPlayButton.setAttribute("aria-label", playing ? "Pause selected track" : "Play selected track");
+          transportPlayButton.title = playing ? "Pause selected track" : "Play selected track";
+          transportPlayButton.setAttribute("aria-pressed", String(Boolean(playing)));
+        }
+        const muteButton = document.getElementById("musicMuteBtn");
+        if (muteButton) {
+          const muted = Boolean(audio?.muted || Number(musicSettings.volume) <= 0);
+          muteButton.textContent = muted ? "🔇" : "🔊";
+          muteButton.setAttribute("aria-label", muted ? "Unmute music" : "Mute music");
+          muteButton.title = muted ? "Unmute music" : "Mute music";
+          muteButton.setAttribute("aria-pressed", String(muted));
+        }
         updateMusicStatus();
       }
 
@@ -4682,9 +4786,40 @@
       function updateMusicVolume(value) {
         musicSettings.volume = Math.min(1, Math.max(0, Number(value) / 100));
         const audio = document.getElementById("musicAudio");
-        if (audio) audio.volume = musicSettings.volume;
+        if (audio) {
+          audio.volume = musicSettings.volume;
+          if (musicSettings.volume > 0) audio.muted = false;
+        }
+        if (musicSettings.volume > 0) musicVolumeBeforeMute = musicSettings.volume;
         syncMusicControls();
         updateMusicNowPlaying();
+      }
+
+      function toggleMusicMute() {
+        const audio = document.getElementById("musicAudio");
+        if (!audio) return;
+        if (audio.muted || Number(musicSettings.volume) <= 0) {
+          const restoredVolume = musicVolumeBeforeMute || 0.35;
+          musicSettings.volume = Math.min(1, Math.max(0.05, restoredVolume));
+          audio.volume = musicSettings.volume;
+          audio.muted = false;
+        } else {
+          musicVolumeBeforeMute = musicSettings.volume || audio.volume || 0.35;
+          audio.muted = true;
+        }
+        syncMusicControls();
+        updateMusicNowPlaying();
+      }
+
+      function skipMusicTrack(direction) {
+        const tracks = Array.isArray(musicSettings.tracks) ? musicSettings.tracks : [];
+        if (!tracks.length) {
+          showToast("Add a music track first.", "error");
+          return;
+        }
+        const currentIndex = Math.max(0, tracks.findIndex((track) => track.id === musicSettings.selectedTrackId));
+        const nextIndex = (currentIndex + Number(direction || 0) + tracks.length) % tracks.length;
+        selectMusicTrack(tracks[nextIndex].id, true);
       }
 
       function toggleMusicPlayback() {
