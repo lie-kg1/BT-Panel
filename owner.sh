@@ -28,9 +28,17 @@ if [[ $# -gt 0 ]]; then
   exit 2
 fi
 
-if ! command -v node >/dev/null 2>&1; then
-  echo "Error: Node.js 20 or newer is required. Run ./install.sh first." >&2
-  exit 1
+runtime_ready=false
+if command -v node >/dev/null 2>&1; then
+  node_major="$(node -p 'Number(process.versions.node.split(".")[0])')"
+  if (( node_major >= 20 )) && [[ -d "$ROOT_DIR/node_modules/bcryptjs" ]]; then
+    runtime_ready=true
+  fi
+fi
+
+if [[ "$runtime_ready" != true ]]; then
+  echo "Node.js 20+ or project dependencies are missing; running ./install.sh..."
+  bash "$ROOT_DIR/install.sh"
 fi
 
 node_major="$(node -p 'Number(process.versions.node.split(".")[0])')"
@@ -40,7 +48,7 @@ if (( node_major < 20 )); then
 fi
 
 if [[ ! -d "$ROOT_DIR/node_modules/bcryptjs" ]]; then
-  echo "Error: dependencies are not installed. Run ./install.sh first." >&2
+  echo "Error: dependencies are not installed after running install.sh." >&2
   exit 1
 fi
 
