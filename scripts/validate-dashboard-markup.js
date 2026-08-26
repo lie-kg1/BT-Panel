@@ -31,6 +31,16 @@ const requiredSnippets = [
   'function switchSettingsTab',
   'function filterWallpaperLibrary',
   'id="wallpaperGrid"',
+  'id="musicTrackList"',
+  'id="musicEnabledToggle"',
+  'function loadMusicSettings',
+  'function saveMusicSettings',
+  'id="generalPanelName"',
+  'id="generalWelcomeMessage"',
+  'function saveGeneralSettings',
+  'id="barsAdminStatsToggle"',
+  'id="barsVersionToggle"',
+  'function saveBarsSettings',
   '.badge-member {',
   'background: rgba(59, 130, 246, 0.16);',
   '.badge-admin {',
@@ -141,6 +151,31 @@ for (const emailAuthSnippet of [
 }
 if (!serverSource.includes('candidate.startsWith("/wallpapers/")')) {
   throw new Error("Local wallpaper URLs cannot be persisted by Save Theme");
+}
+for (const musicSnippet of [
+  'const MUSIC_FILE = path.join(DATA_DIR, "music.json")',
+  'app.get("/api/music", adminRequired',
+  'app.post("/api/music/track", adminRequired',
+  'app.post("/api/music/upload", adminRequired',
+  'app.delete("/api/music/:id", adminRequired',
+]) {
+  if (!serverSource.includes(musicSnippet)) {
+    throw new Error(`Music persistence or route support is incomplete: ${musicSnippet}`);
+  }
+}
+for (const settingsSnippet of [
+  'const GENERAL_FILE = path.join(DATA_DIR, "general.json")',
+  'const BARS_FILE = path.join(DATA_DIR, "bars.json")',
+  'app.get("/api/general", authRequired',
+  'app.post("/api/general", adminRequired',
+  'app.get("/api/bars", authRequired',
+  'app.post("/api/bars", adminRequired',
+  'function sanitizeGeneral(input)',
+  'function sanitizeBars(input)',
+]) {
+  if (!serverSource.includes(settingsSnippet)) {
+    throw new Error(`General/Bars persistence or route support is incomplete: ${settingsSnippet}`);
+  }
 }
 for (const profileSnippet of [
   "function normalizedProfilePic(value)",
