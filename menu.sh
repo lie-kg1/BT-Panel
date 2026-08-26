@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# When sourced through `bash -c "$(curl ...)"`, BASH_SOURCE may be unset.
+# In that case, use the caller's current directory as the project directory.
+SCRIPT_SOURCE="${BASH_SOURCE[0]-}"
+if [[ -n "$SCRIPT_SOURCE" && -f "$SCRIPT_SOURCE" ]]; then
+  ROOT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" && pwd)"
+else
+  ROOT_DIR="$PWD"
+fi
 cd "$ROOT_DIR"
 
 usage() {
   cat <<'USAGE'
 Usage: ./menu.sh
 
-Open the BT Panel interactive launcher. Use the numbered menu to install,
-configure, validate, build, or start the panel.
+Open the BT Panel interactive launcher. Run it from the BT Panel project
+directory. Use the numbered menu to install, configure, validate, build,
+or start the panel.
 USAGE
 }
 
@@ -25,6 +33,14 @@ fi
 
 pause() {
   read -r -p "Press Enter to continue..." _ || true
+}
+
+require_project() {
+  if [[ ! -f "$ROOT_DIR/package.json" || ! -f "$ROOT_DIR/install.sh" ]]; then
+    printf 'Error: BT Panel project files were not found in %s.\n' "$ROOT_DIR" >&2
+    printf 'Clone the repository, cd into its directory, and run menu.sh again.\n' >&2
+    return 1
+  fi
 }
 
 show_menu() {
@@ -50,25 +66,31 @@ while true; do
 
   case "$choice" in
     1)
+      require_project || { pause; continue; }
       bash "$ROOT_DIR/install.sh"
       pause
       ;;
     2)
+      require_project || { pause; continue; }
       bash "$ROOT_DIR/owner.sh"
       pause
       ;;
     3)
+      require_project || { pause; continue; }
       npm run build
       pause
       ;;
     4)
+      require_project || { pause; continue; }
       npm run check
       pause
       ;;
     5)
+      require_project || { pause; continue; }
       exec npm start
       ;;
     6)
+      require_project || { pause; continue; }
       exec npm run dev
       ;;
     7)
