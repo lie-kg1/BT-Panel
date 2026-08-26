@@ -7,6 +7,7 @@ const source = fs.readFileSync(dashboardPath, "utf8");
 const styles = fs.readFileSync(stylesPath, "utf8");
 const serverSource = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
 const root = path.join(__dirname, "..");
+const loginSource = fs.readFileSync(path.join(root, "views", "auth", "login.ejs"), "utf8");
 const authTemplatePaths = [
   path.join(root, "views", "auth", "login.ejs"),
   path.join(root, "views", "auth", "register.ejs"),
@@ -149,6 +150,14 @@ if (!serverSource.includes('res.render("admin/dashboard")')) {
 }
 if (!serverSource.includes('res.status(404).render("errors/404")')) {
   throw new Error("Branded website 404 fallback is missing");
+}
+for (const hostedSnippet of ["const IS_VERCEL", "const RUNTIME_ROOT", "function ensureHostedOwner", "ensureHostedOwner();"]) {
+  if (!serverSource.includes(hostedSnippet)) {
+    throw new Error(`Hosted runtime support is incomplete: ${hostedSnippet}`);
+  }
+}
+if (/value=["']admin(?:12345)?["']/.test(loginSource)) {
+  throw new Error("Login page must not ship hard-coded administrator credentials");
 }
 if (!fs.readFileSync(path.join(root, "src/server.js"), "utf8").includes("module.exports = app")) {
   throw new Error("Server entry point is not exportable for hosted deployment");
