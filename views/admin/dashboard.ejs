@@ -158,6 +158,18 @@
         object-fit: cover;
       }
 
+      .brand-mark-wrap {
+        display: block;
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+      }
+
+      .brand-mark-wrap .brand-mark {
+        width: 100%;
+        height: 100%;
+      }
+
       .brand-text {
         font-weight: 800;
         font-size: 15px;
@@ -2693,6 +2705,17 @@
         background: rgba(5, 7, 18, 0.46);
       }
 
+      .music-icon-svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+        fill: currentColor;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
       .music-transport-btn {
         display: inline-grid;
         width: 34px;
@@ -3005,7 +3028,10 @@
       <aside class="sidebar">
         <div class="sidebar-tools">
           <div class="sidebar-brand" aria-label="BT PANEL">
-            <img class="brand-mark" src="/assets/bt-panel-logo-mark.png" alt="BT Panel logo" />
+            <picture class="brand-mark-wrap">
+              <source srcset="/gemini-svg.svg" type="image/svg+xml" />
+              <img class="brand-mark" src="/assets/bt-panel-logo-mark.png" alt="BT Panel logo" />
+            </picture>
             <span class="brand-text" id="panelBrandName">BT PANEL</span>
           </div>
           <button
@@ -3753,17 +3779,17 @@
                     </div>
                   </div>
                   <div class="music-now-playing">
-                    <div class="music-art" aria-hidden="true">♫</div>
+                    <div class="music-art" aria-hidden="true"><svg class="music-icon-svg" viewBox="0 0 24 24"><path d="M9 18V5l10-2v13" fill="none"></path><circle cx="6" cy="18" r="3"></circle><circle cx="16" cy="16" r="3"></circle></svg></div>
                     <div style="min-width: 0;">
                       <div class="music-now-title" id="musicNowPlaying">No track selected</div>
                       <div class="music-now-meta" id="musicNowMeta">Add a track to begin playback.</div>
                     </div>
                   </div>
                   <div class="music-player-strip" aria-label="Music player controls">
-                    <button class="music-transport-btn" type="button" onclick="skipMusicTrack(-1)" aria-label="Previous track" title="Previous track">◀◀</button>
-                    <button class="music-transport-btn primary" type="button" onclick="toggleMusicPlayback()" id="musicTransportPlayBtn" aria-label="Play selected track" title="Play selected track">▶</button>
-                    <button class="music-transport-btn" type="button" onclick="skipMusicTrack(1)" aria-label="Next track" title="Next track">▶▶</button>
-                    <button class="music-transport-btn" type="button" onclick="toggleMusicMute()" id="musicMuteBtn" aria-label="Mute music" title="Mute music">🔊</button>
+                    <button class="music-transport-btn" type="button" onclick="skipMusicTrack(-1)" aria-label="Previous track" title="Previous track"><svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 6 9 12l9 6z"></path></svg></button>
+                    <button class="music-transport-btn primary" type="button" onclick="toggleMusicPlayback()" id="musicTransportPlayBtn" aria-label="Play selected track" title="Play selected track"><svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7z"></path></svg></button>
+                    <button class="music-transport-btn" type="button" onclick="skipMusicTrack(1)" aria-label="Next track" title="Next track"><svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6v12l9-6zM18 5v14"></path></svg></button>
+                    <button class="music-transport-btn" type="button" onclick="toggleMusicMute()" id="musicMuteBtn" aria-label="Mute music" title="Mute music"><svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"></path><path d="m17 9 4 6m0-6-4 6"></path></svg></button>
                   </div>
                   <div class="music-track-list" id="musicTrackList" aria-live="polite">
                     <div class="music-empty">No music tracks yet.</div>
@@ -4632,7 +4658,7 @@
           const art = document.createElement("span");
           art.className = "music-track-art";
           art.setAttribute("aria-hidden", "true");
-          art.textContent = "♫";
+          art.innerHTML = '<svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l10-2v13" fill="none"></path><circle cx="6" cy="18" r="3"></circle><circle cx="16" cy="16" r="3"></circle></svg>';
           const select = document.createElement("button");
           select.type = "button";
           select.className = "music-track-select";
@@ -4649,7 +4675,7 @@
           play.className = "music-icon-btn";
           play.title = "Play track";
           play.setAttribute("aria-label", `Play ${track.name || "track"}`);
-          play.textContent = "▶";
+          play.innerHTML = MUSIC_ICON_PLAY;
           play.addEventListener("click", () => selectMusicTrack(track.id, true));
           const remove = document.createElement("button");
           remove.type = "button";
@@ -4663,6 +4689,11 @@
         });
         updateMusicNowPlaying();
       }
+
+      const MUSIC_ICON_PLAY = '<svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7z"></path></svg>';
+      const MUSIC_ICON_PAUSE = '<svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"></path></svg>';
+      const MUSIC_ICON_VOLUME = '<svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"></path><path d="M17 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12" fill="none"></path></svg>';
+      const MUSIC_ICON_MUTED = '<svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"></path><path d="m17 9 4 6m0-6-4 6" fill="none"></path></svg>';
 
       function syncMusicControls() {
         const enabled = document.getElementById("musicEnabledToggle");
@@ -4682,7 +4713,7 @@
         const transportPlayButton = document.getElementById("musicTransportPlayBtn");
         if (playButton) playButton.textContent = playing ? "Pause selected" : "Play selected";
         if (transportPlayButton) {
-          transportPlayButton.textContent = playing ? "❚❚" : "▶";
+          transportPlayButton.innerHTML = playing ? MUSIC_ICON_PAUSE : MUSIC_ICON_PLAY;
           transportPlayButton.setAttribute("aria-label", playing ? "Pause selected track" : "Play selected track");
           transportPlayButton.title = playing ? "Pause selected track" : "Play selected track";
           transportPlayButton.setAttribute("aria-pressed", String(Boolean(playing)));
@@ -4690,7 +4721,7 @@
         const muteButton = document.getElementById("musicMuteBtn");
         if (muteButton) {
           const muted = Boolean(audio?.muted || Number(musicSettings.volume) <= 0);
-          muteButton.textContent = muted ? "🔇" : "🔊";
+          muteButton.innerHTML = muted ? MUSIC_ICON_MUTED : MUSIC_ICON_VOLUME;
           muteButton.setAttribute("aria-label", muted ? "Unmute music" : "Mute music");
           muteButton.title = muted ? "Unmute music" : "Mute music";
           muteButton.setAttribute("aria-pressed", String(muted));
