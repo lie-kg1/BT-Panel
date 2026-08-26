@@ -4,20 +4,31 @@ A self-contained Express dashboard with login, registration, session authenticat
 
 ## Run locally
 
-Use Node.js 20 or newer. From this directory, install dependencies and start the server:
+Use the included installer on a Debian or Ubuntu host. It installs or upgrades to Node.js 20+, installs dependencies, creates the runtime directories, and initializes the local users file:
 
 ```bash
-npm install
+./install.sh
+```
+
+To create or update the owner account securely, run:
+
+```bash
+./owner.sh
+```
+
+For an interactive launcher covering installation, owner setup, building, checks, and starting the server, run:
+
+```bash
+./menu.sh
+```
+
+If Node.js and the dependencies are already installed, you can start the server directly:
+
+```bash
 npm start
 ```
 
-To create or update the owner account securely, run the included script from any directory:
-
-```bash
-bash owner.sh
-```
-
-The script uses `admin` / `admin12345` / `admin@gmail.com` as its default owner username, password, and email. You can override these values with `OWNER_USERNAME`, `OWNER_PASSWORD`, and `OWNER_EMAIL` environment variables for non-interactive setup or production deployments; change the defaults before deploying to a public environment.
+The owner script uses `admin` / `admin12345` / `admin@gmail.com` as its default owner username, password, and email when no overrides are supplied. For production or non-interactive setup, set `OWNER_USERNAME`, `OWNER_PASSWORD`, and `OWNER_EMAIL` environment variables; always replace the sample password before exposing the panel publicly. If `OWNER_PASSWORD` is omitted in an interactive terminal, the script prompts for it without echoing the password and asks for confirmation.
 
 Open <http://localhost:3000/>. The `/` route serves the dashboard for authenticated users and redirects signed-out visitors to `/login`. New accounts can be created at `/register`.
 

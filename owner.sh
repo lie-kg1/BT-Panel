@@ -2,32 +2,70 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-USERS_FILE="$ROOT_DIR/data/users.json"
+USERS_FILE="${OWNER_USERS_FILE:-$ROOT_DIR/data/users.json}"
+
+usage() {
+  cat <<'USAGE'
+Usage: ./owner.sh
+
+Create or update the BT Panel owner account.
+
+Environment overrides:
+  OWNER_USERNAME   Owner username; default: admin
+  OWNER_EMAIL      Owner email; default: admin@gmail.com
+  OWNER_PASSWORD   Owner password; if omitted, prompt securely
+  OWNER_USERS_FILE JSON users file; default: ./data/users.json
+USAGE
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -gt 0 ]]; then
+  usage >&2
+  exit 2
+fi
 
 if ! command -v node >/dev/null 2>&1; then
-  echo "Error: Node.js 20 or newer is required." >&2
+  echo "Error: Node.js 20 or newer is required. Run ./install.sh first." >&2
+  exit 1
+fi
+
+node_major="$(node -p 'Number(process.versions.node.split(".")[0])')"
+if (( node_major < 20 )); then
+  echo "Error: Node.js 20 or newer is required; found $(node --version)." >&2
   exit 1
 fi
 
 if [[ ! -d "$ROOT_DIR/node_modules/bcryptjs" ]]; then
-  echo "Error: dependencies are not installed. Run npm install first." >&2
+  echo "Error: dependencies are not installed. Run ./install.sh first." >&2
   exit 1
 fi
 
 username="${OWNER_USERNAME:-admin}"
-if [[ -z "$username" ]]; then
-  read -r -p "Owner username: " username
+if [[ -z "${OWNER_USERNAME+x}" && -t 0 ]]; then
+  read -r -p "Owner username [admin]: " entered_username
+  username="${entered_username:-$username}"
 fi
 
-password="${OWNER_PASSWORD:-admin12345}"
-if [[ -z "$password" ]]; then
+password="${OWNER_PASSWORD:-}"
+if [[ -z "$password" && -t 0 ]]; then
   read -r -s -p "Owner password (minimum 8 characters): " password
   printf '\n'
+  read -r -s -p "Confirm owner password: " password_confirmation
+  printf '\n'
+  [[ "$password" == "$password_confirmation" ]] || {
+    echo "Error: passwords do not match." >&2
+    exit 1
+  }
 fi
 
 email="${OWNER_EMAIL:-admin@gmail.com}"
-if [[ -z "$email" && -t 0 ]]; then
-  read -r -p "Owner email (optional): " email
+if [[ -z "${OWNER_EMAIL+x}" && -t 0 ]]; then
+  read -r -p "Owner email [admin@gmail.com]: " entered_email
+  email="${entered_email:-$email}"
 fi
 
 if [[ ! "$username" =~ ^[A-Za-z0-9._-]{3,32}$ ]]; then
@@ -36,7 +74,7 @@ if [[ ! "$username" =~ ^[A-Za-z0-9._-]{3,32}$ ]]; then
 fi
 
 if [[ ${#password} -lt 8 ]]; then
-  echo "Error: password must be at least 8 characters." >&2
+  echo "Error: password must be at least 8 characters. Set OWNER_PASSWORD or enter it interactively." >&2
   exit 1
 fi
 
@@ -96,6 +134,7 @@ if (existing) {
 const tempFile = `${usersFile}.tmp-${process.pid}`;
 fs.mkdirSync(path.dirname(usersFile), { recursive: true });
 fs.writeFileSync(tempFile, `${JSON.stringify({ __version__: 2, users: data.users }, null, 2)}\n`, { mode: 0o600 });
+fs.chmodSync(tempFile, 0o600);
 fs.renameSync(tempFile, usersFile);
 console.log(`Owner account ${existing ? "updated" : "created"}: ${username}`);
 NODE
