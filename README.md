@@ -63,6 +63,22 @@ If Node.js and the dependencies are already installed, you can start the server 
 npm start
 ```
 
+## Music settings
+
+Administrators can open **Settings → Music** to manage ambient audio for the panel. The Music studio supports direct HTTP(S) audio URLs and local uploads for common formats such as MP3, WAV, OGG, OPUS, AAC, FLAC, M4A, and WEBM. Uploaded files are stored in `media/music/` and are excluded from source control by the repository ignore rules.
+
+The studio provides a track library, selected-track playback, enable/disable control, autoplay, loop, volume, deletion, and a save action. Browser autoplay policies may require the administrator to click Play once before a track can start. Music preferences and track metadata are stored in `data/music.json`; only administrators can access the related API routes.
+
+The API surface is:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/music` | Read the current administrator music settings and track library. |
+| `POST /api/music` | Save playback preferences and the selected track. |
+| `POST /api/music/track` | Add a direct HTTP(S) audio URL. |
+| `POST /api/music/upload` | Upload a local audio file up to 50 MB. |
+| `DELETE /api/music/:id` | Remove a track and delete its local uploaded file when applicable. |
+
 The owner script uses `admin` / `admin12345` / `admin@gmail.com` as its default owner username, password, and email when no overrides are supplied. For production or non-interactive setup, set `OWNER_USERNAME`, `OWNER_PASSWORD`, and `OWNER_EMAIL` environment variables; always replace the sample password before exposing the panel publicly. If `OWNER_PASSWORD` is omitted in an interactive terminal, the script prompts for it without echoing the password and asks for confirmation.
 
 Open <http://localhost:3000/>. The `/` route serves the dashboard for authenticated users and redirects signed-out visitors to `/login`. New accounts can be created at `/register`.

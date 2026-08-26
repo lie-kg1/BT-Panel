@@ -21,6 +21,8 @@ const PROFILE_DIR = path.join(ROOT, "profile");
 const BACKGROUND_DIR = path.join(ROOT, "Background");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const THEME_FILE = path.join(DATA_DIR, "theme.json");
+const MUSIC_FILE = path.join(DATA_DIR, "music.json");
+const MUSIC_DIR = path.join(MEDIA_DIR, "music");
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "botpanel.sid";
 const SESSION_SECRET = process.env.SESSION_SECRET || "change-this-session-secret";
 const PRESENCE_TIMEOUT_MS = 5 * 60 * 1000;
@@ -47,7 +49,7 @@ function isOnline(userId) {
   return Boolean(entry && entry.sessions.size > 0 && Date.now() - entry.lastSeen <= PRESENCE_TIMEOUT_MS);
 }
 
-for (const dir of [PUBLIC_DIR, DATA_DIR, MEDIA_DIR, PROFILE_DIR, BACKGROUND_DIR]) {
+for (const dir of [PUBLIC_DIR, DATA_DIR, MEDIA_DIR, MUSIC_DIR, PROFILE_DIR, BACKGROUND_DIR]) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
@@ -210,6 +212,76 @@ function saveTheme(theme) {
   writeJson(THEME_FILE, sanitizeTheme(theme));
 }
 
+const DEFAULT_MUSIC = {
+  enabled: false,
+  autoplay: false,
+  loop: true,
+  volume: 0.35,
+  selectedTrackId: "",
+  tracks: [],
+};
+
+function sanitizeMusicUrl(value) {
+  if (typeof value !== "string") return "";
+  const candidate = value.trim().slice(0, 1000);
+  if (candidate.startsWith("/media/")) return candidate;
+  try {
+    const parsed = new URL(candidate);
+    return ["https:", "http:"].includes(parsed.protocol) ? parsed.toString() : "";
+  } catch (_) {
+    return "";
+  }
+}
+
+function sanitizeMusicTrack(input, fallbackId = crypto.randomUUID()) {
+  const track = input || {};
+  const url = sanitizeMusicUrl(track.url);
+  if (!url) return null;
+  const rawId = String(track.id || fallbackId).trim().slice(0, 80);
+  const id = /^[a-zA-Z0-9_-]+$/.test(rawId) ? rawId : fallbackId;
+  const name = String(track.name || track.title || "Untitled track").trim().slice(0, 120) || "Untitled track";
+  const source = track.source === "upload" || url.startsWith("/media/music/") ? "upload" : "external";
+  return { id, name, url, source, createdAt: Number(track.createdAt) || Date.now() };
+}
+
+function sanitizeMusic(input) {
+  const music = input || {};
+  const tracks = [];
+  const seen = new Set();
+  for (const candidate of Array.isArray(music.tracks) ? music.tracks : []) {
+    const track = sanitizeMusicTrack(candidate);
+    if (!track || seen.has(track.url)) continue;
+    seen.add(track.url);
+    tracks.push(track);
+  }
+  const requestedVolume = Number(music.volume);
+  const volume = Number.isFinite(requestedVolume)
+    ? Math.min(1, Math.max(0, requestedVolume > 1 ? requestedVolume / 100 : requestedVolume))
+    : DEFAULT_MUSIC.volume;
+  const requestedSelected = String(music.selectedTrackId || "");
+  const selectedTrackId = tracks.some((track) => track.id === requestedSelected)
+    ? requestedSelected
+    : tracks[0]?.id || "";
+  return {
+    enabled: booleanSetting(music.enabled, DEFAULT_MUSIC.enabled),
+    autoplay: booleanSetting(music.autoplay, DEFAULT_MUSIC.autoplay),
+    loop: booleanSetting(music.loop, DEFAULT_MUSIC.loop),
+    volume,
+    selectedTrackId,
+    tracks,
+  };
+}
+
+function loadMusic() {
+  return sanitizeMusic(readJson(MUSIC_FILE, DEFAULT_MUSIC));
+}
+
+function saveMusic(music) {
+  const saved = sanitizeMusic(music);
+  writeJson(MUSIC_FILE, saved);
+  return saved;
+}
+
 function authRequired(req, res, next) {
   const user = currentUser(req);
   if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
@@ -256,6 +328,16 @@ const upload = multer({
   fileFilter: (_req, file, cb) => {
     const allowed = /^(image\/(png|jpeg|jpg|gif|webp)|video\/(mp4|webm|quicktime))$/i.test(file.mimetype);
     cb(allowed ? null : new Error("Only image, MP4, WEBM, or MOV files are allowed."), allowed);
+  },
+});
+
+const musicUpload = multer({
+  dest: MUSIC_DIR,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowedMime = /^audio\/(mpeg|mp3|wav|ogg|oga|opus|webm|aac|flac|mp4|x-m4a)$/i.test(file.mimetype);
+    const allowedExtension = /\.(mp3|wav|ogg|oga|opus|webm|aac|flac|m4a|mp4)$/i.test(file.originalname);
+    cb(allowedMime || allowedExtension ? null : new Error("Only common audio files are allowed."), allowedMime || allowedExtension);
   },
 });
 
@@ -442,6 +524,54 @@ app.post("/api/theme", adminRequired, (req, res) => {
   const theme = sanitizeTheme(req.body);
   saveTheme(theme);
   res.json({ success: true, theme });
+});
+
+app.get("/api/music", adminRequired, (_req, res) => {
+  res.json({ success: true, music: loadMusic() });
+});
+
+app.post("/api/music", adminRequired, (req, res) => {
+  const current = loadMusic();
+  const music = saveMusic({ ...current, ...req.body, tracks: current.tracks });
+  res.json({ success: true, music });
+});
+
+app.post("/api/music/track", adminRequired, (req, res) => {
+  const track = sanitizeMusicTrack({ name: req.body.name, url: req.body.url, source: "external" });
+  if (!track) return res.status(400).json({ success: false, message: "Enter a valid HTTP(S) audio URL." });
+  const current = loadMusic();
+  const tracks = [track, ...current.tracks.filter((candidate) => candidate.url !== track.url)];
+  const music = saveMusic({ ...current, tracks, selectedTrackId: current.selectedTrackId || track.id });
+  res.status(201).json({ success: true, music });
+});
+
+app.post("/api/music/upload", adminRequired, (req, res) => {
+  musicUpload.single("file")(req, res, (error) => {
+    if (error) return res.status(400).json({ success: false, message: error.message });
+    if (!req.file) return res.status(400).json({ success: false, message: "Choose an audio file to upload." });
+    const ext = path.extname(req.file.originalname).toLowerCase() || ".mp3";
+    const finalName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}${ext}`;
+    const finalPath = path.join(MUSIC_DIR, finalName);
+    fs.renameSync(req.file.path, finalPath);
+    const track = sanitizeMusicTrack({ name: path.basename(req.file.originalname, ext), url: `/media/music/${encodeURIComponent(finalName)}`, source: "upload" });
+    const current = loadMusic();
+    const music = saveMusic({ ...current, tracks: [track, ...current.tracks], selectedTrackId: current.selectedTrackId || track.id });
+    res.status(201).json({ success: true, music });
+  });
+});
+
+app.delete("/api/music/:id", adminRequired, (req, res) => {
+  const current = loadMusic();
+  const track = current.tracks.find((candidate) => candidate.id === req.params.id);
+  if (!track) return res.status(404).json({ success: false, message: "Music track not found." });
+  if (track.source === "upload" && track.url.startsWith("/media/music/")) {
+    const filename = safeFileName(decodeURIComponent(track.url.split("/").pop() || ""));
+    const file = path.join(MUSIC_DIR, filename);
+    if (filename && fs.existsSync(file)) fs.unlinkSync(file);
+  }
+  const tracks = current.tracks.filter((candidate) => candidate.id !== track.id);
+  const music = saveMusic({ ...current, tracks, selectedTrackId: current.selectedTrackId === track.id ? tracks[0]?.id || "" : current.selectedTrackId });
+  res.json({ success: true, music });
 });
 
 app.get("/api/media/list", adminRequired, (_req, res) => res.json({ success: true, files: listMedia() }));
