@@ -51,7 +51,8 @@ const requiredSnippets = [
   'fetchUsers({ silent: true })',
   'document.addEventListener("visibilitychange"',
   'src="/assets/bt-panel-logo-mark.png"',
-  'href="/assets/bt-panel-logo-mark.png"'
+  'href="/assets/bt-panel-logo-mark.png"',
+  'href="/gemini-svg.svg"'
 ];
 
 for (const snippet of requiredSnippets) {
@@ -137,6 +138,7 @@ for (const relativePath of [
   "scripts/build.js",
   "public/assets/bt-panel-logo.png",
   "public/assets/bt-panel-logo-mark.png",
+  "public/gemini-svg.svg",
   "docs/reference/settings-general-reference.png",
   "views/errors/404.ejs",
   "vercel.json",
