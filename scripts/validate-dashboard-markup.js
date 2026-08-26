@@ -185,6 +185,18 @@ for (const musicSnippet of [
     throw new Error(`Music persistence or route support is incomplete: ${musicSnippet}`);
   }
 }
+for (const playbackSnippet of [
+  'function startMusicPlayback()',
+  'musicSettings.enabled && shouldPlay',
+  'Click Play selected to start audio in this browser.',
+]) {
+  if (!source.includes(playbackSnippet)) {
+    throw new Error(`User-gesture-safe music playback is incomplete: ${playbackSnippet}`);
+  }
+}
+if (source.includes('(shouldPlay || musicSettings.autoplay)')) {
+  throw new Error("Music autoplay must not call audio.play() during page or settings initialization");
+}
 for (const settingsSnippet of [
   'const GENERAL_FILE = path.join(DATA_DIR, "general.json")',
   'const BARS_FILE = path.join(DATA_DIR, "bars.json")',
