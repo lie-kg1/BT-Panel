@@ -63,7 +63,24 @@ If Node.js and the dependencies are already installed, you can start the server 
 npm start
 ```
 
-## Music settings
+## General, Music, and Bars settings
+
+Administrators can open **Settings → General** to configure the panel name, sidebar branding, browser title, welcome heading, welcome message, and the short subtitle beside the Home card heading. Values are sanitized, stored in `data/general.json`, and applied to the dashboard after saving. The General panel also includes a live preview so changes can be reviewed before they are persisted.
+
+**Settings → Bars** controls which Home dashboard indicators are shown. Administrators can independently show or hide admin statistics, the panel version card, the signed-in role phrase, and the top-header account control. These choices are stored in `data/bars.json` and are applied both when the Home view renders and when the dashboard refreshes presence data.
+
+Both settings panels retain the dark glassmorphism treatment used by the supplied Settings reference: rounded translucent cards, violet active controls, muted helper text, and dashed preview surfaces.
+
+The General and Bars API surface is:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/general` | Read the authenticated panel identity and welcome settings. |
+| `POST /api/general` | Administrator-only save for panel identity and welcome settings. |
+| `GET /api/bars` | Read the authenticated Home indicator visibility settings. |
+| `POST /api/bars` | Administrator-only save for Home indicator visibility settings. |
+
+### Music settings
 
 Administrators can open **Settings → Music** to manage ambient audio for the panel. The Music studio supports direct HTTP(S) audio URLs and local uploads for common formats such as MP3, WAV, OGG, OPUS, AAC, FLAC, M4A, and WEBM. Uploaded files are stored in `media/music/` and are excluded from source control by the repository ignore rules.
 
@@ -100,6 +117,9 @@ Copy `.env.example` to `.env` and set a strong `SESSION_SECRET` before using the
 | `/register` | Registration page |
 | `/api/me` | Current authenticated user |
 | `/api/theme` | Read or save the appearance theme |
+| `/api/general` | Read or save administrator panel identity and welcome settings |
+| `/api/bars` | Read or save administrator Home indicator visibility settings |
+| `/api/music/*` | Administrator ambient music library and playback settings |
 | `/api/team` | Read-only team list |
 | `/api/users` | Admin user management |
 | `/api/media/*` | Admin background media management |

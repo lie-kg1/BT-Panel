@@ -22,6 +22,8 @@ const BACKGROUND_DIR = path.join(ROOT, "Background");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const THEME_FILE = path.join(DATA_DIR, "theme.json");
 const MUSIC_FILE = path.join(DATA_DIR, "music.json");
+const GENERAL_FILE = path.join(DATA_DIR, "general.json");
+const BARS_FILE = path.join(DATA_DIR, "bars.json");
 const MUSIC_DIR = path.join(MEDIA_DIR, "music");
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "botpanel.sid";
 const SESSION_SECRET = process.env.SESSION_SECRET || "change-this-session-secret";
@@ -282,6 +284,65 @@ function saveMusic(music) {
   return saved;
 }
 
+const DEFAULT_GENERAL = {
+  panelName: "BT PANEL",
+  panelSubtitle: "Control center",
+  welcomeTitle: "Welcome",
+  welcomeMessage: "Manage your panel from one place.",
+};
+
+function cleanText(value, fallback, maxLength) {
+  const text = String(value ?? "").replace(/[<>]/g, "").trim().slice(0, maxLength);
+  return text || fallback;
+}
+
+function sanitizeGeneral(input) {
+  const general = input || {};
+  return {
+    panelName: cleanText(general.panelName, DEFAULT_GENERAL.panelName, 48),
+    panelSubtitle: cleanText(general.panelSubtitle, DEFAULT_GENERAL.panelSubtitle, 120),
+    welcomeTitle: cleanText(general.welcomeTitle, DEFAULT_GENERAL.welcomeTitle, 80),
+    welcomeMessage: cleanText(general.welcomeMessage, DEFAULT_GENERAL.welcomeMessage, 240),
+  };
+}
+
+function loadGeneral() {
+  return sanitizeGeneral(readJson(GENERAL_FILE, DEFAULT_GENERAL));
+}
+
+function saveGeneral(general) {
+  const saved = sanitizeGeneral(general);
+  writeJson(GENERAL_FILE, saved);
+  return saved;
+}
+
+const DEFAULT_BARS = {
+  showAdminStats: true,
+  showVersion: true,
+  showRole: true,
+  showHeaderUser: true,
+};
+
+function sanitizeBars(input) {
+  const bars = input || {};
+  return {
+    showAdminStats: booleanSetting(bars.showAdminStats, DEFAULT_BARS.showAdminStats),
+    showVersion: booleanSetting(bars.showVersion, DEFAULT_BARS.showVersion),
+    showRole: booleanSetting(bars.showRole, DEFAULT_BARS.showRole),
+    showHeaderUser: booleanSetting(bars.showHeaderUser, DEFAULT_BARS.showHeaderUser),
+  };
+}
+
+function loadBars() {
+  return sanitizeBars(readJson(BARS_FILE, DEFAULT_BARS));
+}
+
+function saveBars(bars) {
+  const saved = sanitizeBars(bars);
+  writeJson(BARS_FILE, saved);
+  return saved;
+}
+
 function authRequired(req, res, next) {
   const user = currentUser(req);
   if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
@@ -524,6 +585,24 @@ app.post("/api/theme", adminRequired, (req, res) => {
   const theme = sanitizeTheme(req.body);
   saveTheme(theme);
   res.json({ success: true, theme });
+});
+
+app.get("/api/general", authRequired, (_req, res) => {
+  res.json({ success: true, general: loadGeneral() });
+});
+
+app.post("/api/general", adminRequired, (req, res) => {
+  const general = saveGeneral(req.body);
+  res.json({ success: true, general });
+});
+
+app.get("/api/bars", authRequired, (_req, res) => {
+  res.json({ success: true, bars: loadBars() });
+});
+
+app.post("/api/bars", adminRequired, (req, res) => {
+  const bars = saveBars(req.body);
+  res.json({ success: true, bars });
 });
 
 app.get("/api/music", adminRequired, (_req, res) => {
