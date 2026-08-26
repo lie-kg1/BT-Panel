@@ -4587,8 +4587,9 @@
         if (volume) volume.value = String(value);
         const volumeLabel = document.getElementById("musicVolumeValue");
         if (volumeLabel) volumeLabel.textContent = `${value}%`;
+        const audio = document.getElementById("musicAudio");
         const playButton = document.getElementById("musicPlayBtn");
-        if (playButton) playButton.textContent = musicSettings.enabled ? "Pause selected" : "Play selected";
+        if (playButton) playButton.textContent = audio && !audio.paused && !audio.ended ? "Pause selected" : "Play selected";
         updateMusicStatus();
       }
 
@@ -4613,6 +4614,26 @@
         status.classList.toggle("active", Boolean(playing || musicSettings.enabled));
       }
 
+      function startMusicPlayback() {
+        const audio = document.getElementById("musicAudio");
+        if (!audio) return;
+        const playback = audio.play();
+        if (!playback || typeof playback.then !== "function") {
+          syncMusicControls();
+          return;
+        }
+        playback.then(() => {
+          syncMusicControls();
+        }).catch((error) => {
+          syncMusicControls();
+          if (error?.name === "NotAllowedError") {
+            showToast("Click Play selected to start audio in this browser.", "error");
+          } else {
+            showToast("Unable to start this audio track.", "error");
+          }
+        });
+      }
+
       function applyMusicSettings(shouldPlay = false) {
         const audio = document.getElementById("musicAudio");
         if (!audio) return;
@@ -4625,8 +4646,8 @@
           audio.load();
         }
         updateMusicNowPlaying();
-        if (track && musicSettings.enabled && (shouldPlay || musicSettings.autoplay)) {
-          audio.play().catch(() => showToast("Playback needs a click in this browser.", "error"));
+        if (track && musicSettings.enabled && shouldPlay) {
+          startMusicPlayback();
         } else if (!musicSettings.enabled) {
           audio.pause();
         }
