@@ -137,6 +137,8 @@ for (const relativePath of [
   "public/assets/bt-panel-logo.png",
   "public/assets/bt-panel-logo-mark.png",
   "docs/reference/settings-general-reference.png",
+  "views/errors/404.ejs",
+  "vercel.json",
 ]) {
   if (!fs.existsSync(path.join(root, relativePath))) {
     throw new Error(`Missing organized project file: ${relativePath}`);
@@ -144,6 +146,12 @@ for (const relativePath of [
 }
 if (!serverSource.includes('res.render("admin/dashboard")')) {
   throw new Error("Server route is not rendering admin/dashboard");
+}
+if (!serverSource.includes('res.status(404).render("errors/404")')) {
+  throw new Error("Branded website 404 fallback is missing");
+}
+if (!fs.readFileSync(path.join(root, "src/server.js"), "utf8").includes("module.exports = app")) {
+  throw new Error("Server entry point is not exportable for hosted deployment");
 }
 for (const emailAuthSnippet of [
   'normalizeUsername(user.email) === normalizeUsername(email)',
