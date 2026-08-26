@@ -93,9 +93,33 @@ function writeJson(file, value) {
   fs.renameSync(temp, file);
 }
 
+let cachedHostedOwner = null;
+
+function getHostedOwner() {
+  if (!IS_VERCEL || !OWNER_PASSWORD || !validUsername(OWNER_USERNAME) || !validEmail(OWNER_EMAIL) || OWNER_PASSWORD.length < 8) return null;
+  if (!cachedHostedOwner) {
+    cachedHostedOwner = {
+      id: `hosted-owner-${crypto.createHash("sha256").update(`${OWNER_USERNAME.toLowerCase()}|${OWNER_EMAIL.toLowerCase()}`).digest("hex").slice(0, 24)}`,
+      username: OWNER_USERNAME,
+      email: OWNER_EMAIL,
+      passwordHash: bcrypt.hashSync(OWNER_PASSWORD, 10),
+      role: "owner",
+      status: "active",
+      profilePic: "",
+      bio: "",
+      createdAt: Date.now(),
+      lastLogin: null,
+      twoFactorEnabled: false,
+    };
+  }
+  return cachedHostedOwner;
+}
+
 function loadUsers() {
   const data = readJson(USERS_FILE, { __version__: 2, users: [] });
   if (!Array.isArray(data.users)) data.users = [];
+  const hostedOwner = getHostedOwner();
+  if (hostedOwner && !data.users.some((user) => user.id === hostedOwner.id)) data.users.unshift({ ...hostedOwner });
   return data;
 }
 
@@ -138,28 +162,16 @@ function validEmail(value) {
 }
 
 function ensureHostedOwner() {
-  if (!IS_VERCEL || !OWNER_PASSWORD) return;
-  const data = loadUsers();
-  if (data.users.length > 0) return;
-  if (!validUsername(OWNER_USERNAME) || !validEmail(OWNER_EMAIL) || OWNER_PASSWORD.length < 8) {
-    console.warn("OWNER_USERNAME, OWNER_EMAIL, and OWNER_PASSWORD must be valid for hosted owner bootstrap.");
+  const owner = getHostedOwner();
+  if (!owner) {
+    if (IS_VERCEL && OWNER_PASSWORD) console.warn("OWNER_USERNAME, OWNER_EMAIL, and OWNER_PASSWORD must be valid for hosted owner bootstrap.");
     return;
   }
-  const now = new Date().toISOString();
-  data.users.push({
-    id: crypto.randomUUID(),
-    username: OWNER_USERNAME,
-    email: OWNER_EMAIL,
-    passwordHash: bcrypt.hashSync(OWNER_PASSWORD, 10),
-    role: "owner",
-    status: "active",
-    profilePic: "",
-    bio: "",
-    createdAt: now,
-    lastLogin: null,
-    twoFactorEnabled: false,
-  });
-  saveUsers(data);
+  const data = loadUsers();
+  if (!data.users.some((user) => user.id === owner.id)) {
+    data.users.unshift({ ...owner });
+    saveUsers(data);
+  }
 }
 
 ensureHostedOwner();
