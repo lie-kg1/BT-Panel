@@ -49,6 +49,8 @@ const requiredSnippets = [
   'fetchTeam({ silent: true })',
   'fetchUsers({ silent: true })',
   'document.addEventListener("visibilitychange"',
+  'src="/assets/bt-panel-logo-mark.png"',
+  'href="/assets/bt-panel-logo-mark.png"'
 ];
 
 for (const snippet of requiredSnippets) {
@@ -132,6 +134,9 @@ for (const relativePath of [
   "html/login.html",
   "html/register.html",
   "scripts/build.js",
+  "public/assets/bt-panel-logo.png",
+  "public/assets/bt-panel-logo-mark.png",
+  "docs/reference/settings-general-reference.png",
 ]) {
   if (!fs.existsSync(path.join(root, relativePath))) {
     throw new Error(`Missing organized project file: ${relativePath}`);
