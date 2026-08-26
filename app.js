@@ -699,9 +699,21 @@ app.post("/api/me/password", authRequired, async (req, res) => {
   res.json({ success: true });
 });
 
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ success: false, message: "API route not found." });
+  }
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  res.status(404).render("errors/404");
+});
+
 app.use((error, _req, res, _next) => {
   console.error(error);
   res.status(500).json({ success: false, message: "Internal server error." });
 });
 
-app.listen(PORT, HOST, () => console.log(`BT PANEL running at http://localhost:${PORT}`));
+if (require.main === module) {
+  app.listen(PORT, HOST, () => console.log(`BT PANEL running at http://localhost:${PORT}`));
+}
+
+module.exports = app;
