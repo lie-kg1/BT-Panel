@@ -13,12 +13,18 @@ const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "0.0.0.0";
 const ROOT = __dirname;
+const IS_VERCEL = process.env.VERCEL === "1" || Boolean(process.env.VERCEL_ENV);
+const RUNTIME_ROOT = IS_VERCEL
+  ? path.resolve(process.env.BT_PANEL_RUNTIME_DIR || path.join("/tmp", "bt-panel"))
+  : ROOT;
 const PUBLIC_DIR = path.join(ROOT, "public");
 const VIEWS_DIR = path.join(ROOT, "views");
-const DATA_DIR = path.join(ROOT, "data");
-const MEDIA_DIR = path.resolve(ROOT, process.env.MEDIA_DIR || "./media");
-const PROFILE_DIR = path.join(ROOT, "profile");
-const BACKGROUND_DIR = path.join(ROOT, "Background");
+const DATA_DIR = path.join(RUNTIME_ROOT, "data");
+const MEDIA_DIR = process.env.MEDIA_DIR
+  ? path.resolve(ROOT, process.env.MEDIA_DIR)
+  : path.join(RUNTIME_ROOT, "media");
+const PROFILE_DIR = path.join(RUNTIME_ROOT, "profile");
+const BACKGROUND_DIR = path.join(RUNTIME_ROOT, "Background");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const THEME_FILE = path.join(DATA_DIR, "theme.json");
 const MUSIC_FILE = path.join(DATA_DIR, "music.json");
