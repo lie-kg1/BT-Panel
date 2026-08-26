@@ -2455,6 +2455,319 @@
         text-align: center;
       }
 
+      .music-studio-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
+        gap: 18px;
+      }
+
+      .music-panel {
+        min-width: 0;
+        padding: 20px;
+        border: 1px solid rgba(137, 148, 176, 0.18);
+        border-radius: 14px;
+        background: linear-gradient(145deg, rgba(17, 20, 37, 0.88), rgba(10, 12, 24, 0.72));
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+      }
+
+      .music-panel-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .music-panel-heading h3 {
+        margin: 0 0 5px;
+        font-size: 15px;
+      }
+
+      .music-panel-heading p {
+        margin: 0;
+        color: var(--text-dim);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .music-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border: 1px solid rgba(137, 148, 176, 0.2);
+        border-radius: 999px;
+        color: var(--text-dim);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .music-status::before {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #7f879b;
+        content: "";
+      }
+
+      .music-status.active {
+        color: #e9e7ff;
+        border-color: rgba(125, 103, 255, 0.55);
+        background: rgba(92, 75, 246, 0.18);
+      }
+
+      .music-status.active::before {
+        background: #9b8cff;
+        box-shadow: 0 0 12px rgba(155, 140, 255, 0.9);
+      }
+
+      .music-now-playing {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-height: 76px;
+        margin-bottom: 18px;
+        padding: 14px;
+        border: 1px solid rgba(137, 148, 176, 0.14);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.035);
+      }
+
+      .music-art {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        flex: 0 0 48px;
+        place-items: center;
+        border-radius: 12px;
+        color: #fff;
+        background: radial-gradient(circle at 30% 25%, #b9b0ff, transparent 28%), linear-gradient(135deg, #5c4bf6, #15172b 75%);
+        box-shadow: 0 0 22px rgba(92, 75, 246, 0.32);
+        font-size: 21px;
+      }
+
+      .music-now-title {
+        overflow: hidden;
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .music-now-meta {
+        margin-top: 4px;
+        color: var(--text-dim);
+        font-size: 11px;
+      }
+
+      .music-track-list {
+        display: grid;
+        gap: 8px;
+        max-height: 260px;
+        overflow: auto;
+      }
+
+      .music-track-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 11px;
+        border: 1px solid rgba(137, 148, 176, 0.12);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.025);
+        transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+      }
+
+      .music-track-row:hover,
+      .music-track-row.selected {
+        transform: translateY(-1px);
+        border-color: rgba(125, 103, 255, 0.6);
+        background: rgba(92, 75, 246, 0.14);
+      }
+
+      .music-track-select {
+        min-width: 0;
+        flex: 1;
+        padding: 0;
+        border: 0;
+        color: var(--text-primary);
+        background: transparent;
+        text-align: left;
+      }
+
+      .music-track-name {
+        overflow: hidden;
+        display: block;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .music-track-source {
+        display: block;
+        margin-top: 3px;
+        color: var(--text-dim);
+        font-size: 10px;
+      }
+
+      .music-icon-btn {
+        display: inline-grid;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        place-items: center;
+        padding: 0;
+        border: 1px solid rgba(137, 148, 176, 0.18);
+        border-radius: 8px;
+        color: var(--text-dim);
+        background: rgba(255, 255, 255, 0.04);
+        cursor: pointer;
+      }
+
+      .music-icon-btn:hover {
+        color: #fff;
+        border-color: rgba(125, 103, 255, 0.65);
+      }
+
+      .music-icon-btn.danger:hover {
+        color: #ffb3bd;
+        border-color: rgba(241, 96, 115, 0.65);
+      }
+
+      .music-empty {
+        padding: 18px 12px;
+        border: 1px dashed rgba(137, 148, 176, 0.2);
+        border-radius: 10px;
+        color: var(--text-dim);
+        text-align: center;
+        font-size: 12px;
+      }
+
+      .music-add-row {
+        display: grid;
+        grid-template-columns: 0.75fr 1.25fr auto;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .music-file-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .music-control-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(137, 148, 176, 0.1);
+      }
+
+      .music-control-row:last-of-type {
+        border-bottom: 0;
+      }
+
+      .music-control-label strong {
+        display: block;
+        color: var(--text-primary);
+        font-size: 13px;
+      }
+
+      .music-control-label span {
+        display: block;
+        margin-top: 3px;
+        color: var(--text-dim);
+        font-size: 11px;
+      }
+
+      .music-switch {
+        position: relative;
+        width: 42px;
+        height: 24px;
+        flex: 0 0 42px;
+      }
+
+      .music-switch input {
+        width: 0;
+        height: 0;
+        opacity: 0;
+      }
+
+      .music-switch span {
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: rgba(137, 148, 176, 0.28);
+        cursor: pointer;
+        transition: background 0.16s ease;
+      }
+
+      .music-switch span::before {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #fff;
+        content: "";
+        transition: transform 0.16s ease;
+      }
+
+      .music-switch input:checked + span {
+        background: linear-gradient(90deg, #5c4bf6, #9b8cff);
+      }
+
+      .music-switch input:checked + span::before {
+        transform: translateX(18px);
+      }
+
+      .music-volume {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .music-volume input[type="range"] {
+        width: 130px;
+      }
+
+      .music-volume-value {
+        width: 42px;
+        color: var(--text-dim);
+        font-size: 11px;
+        text-align: right;
+      }
+
+      .music-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .music-note {
+        margin: 14px 0 0;
+        color: var(--text-dim);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 900px) {
+        .music-studio-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .music-add-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
       @media (max-width: 900px) {
         .settings-studio-grid {
           grid-template-columns: 1fr;
@@ -3178,7 +3491,78 @@
           <div class="settings-placeholder"><strong>General settings</strong><br />Panel identity and global defaults will appear here.</div>
         </section>
         <section class="settings-tab-panel" id="settings-panel-music" role="tabpanel" aria-labelledby="settings-tab-music">
-          <div class="settings-placeholder"><strong>Music settings</strong><br />Configure ambient audio and playback preferences here.</div>
+          <div class="card">
+            <div class="card-toolbar settings-card-heading">
+              <div>
+                <h2>Music Settings</h2>
+                <p>Manage ambient audio and playback preferences for your panel.</p>
+              </div>
+              <span class="music-status" id="musicStatus">Disabled</span>
+            </div>
+            <div class="card-body">
+              <div class="music-studio-grid">
+                <section class="music-panel" aria-labelledby="music-library-title">
+                  <div class="music-panel-heading">
+                    <div>
+                      <h3 id="music-library-title">Track library</h3>
+                      <p>Upload a local audio file or add a direct HTTP(S) audio URL.</p>
+                    </div>
+                  </div>
+                  <div class="music-now-playing">
+                    <div class="music-art" aria-hidden="true">♫</div>
+                    <div style="min-width: 0;">
+                      <div class="music-now-title" id="musicNowPlaying">No track selected</div>
+                      <div class="music-now-meta" id="musicNowMeta">Add a track to begin playback.</div>
+                    </div>
+                  </div>
+                  <div class="music-track-list" id="musicTrackList" aria-live="polite">
+                    <div class="music-empty">No music tracks yet.</div>
+                  </div>
+                  <div class="music-add-row">
+                    <input class="input" id="musicTrackName" type="text" maxlength="120" placeholder="Track name" />
+                    <input class="input" id="musicTrackUrl" type="url" maxlength="1000" placeholder="https://example.com/ambient.mp3" />
+                    <button class="btn btn-primary" type="button" onclick="addExternalMusicTrack()">Add URL</button>
+                  </div>
+                  <div class="music-file-row">
+                    <input type="file" id="musicFileInput" accept="audio/*,.mp3,.wav,.ogg,.oga,.opus,.webm,.aac,.flac,.m4a" hidden onchange="uploadMusicTrack(this.files[0])" />
+                    <button class="btn btn-ghost" type="button" onclick="document.getElementById('musicFileInput').click()">Upload audio</button>
+                    <button class="btn btn-ghost" type="button" onclick="toggleMusicPlayback()" id="musicPlayBtn">Play selected</button>
+                  </div>
+                </section>
+
+                <section class="music-panel" aria-labelledby="music-preferences-title">
+                  <div class="music-panel-heading">
+                    <div>
+                      <h3 id="music-preferences-title">Playback preferences</h3>
+                      <p>Changes stay local until you save them.</p>
+                    </div>
+                  </div>
+                  <div class="music-control-row">
+                    <div class="music-control-label"><strong>Enable ambient music</strong><span>Allow the player to run across panel views.</span></div>
+                    <label class="music-switch"><input type="checkbox" id="musicEnabledToggle" onchange="updateMusicEnabled(this.checked)" /><span aria-hidden="true"></span></label>
+                  </div>
+                  <div class="music-control-row">
+                    <div class="music-control-label"><strong>Autoplay</strong><span>Browsers may require a first click before playback.</span></div>
+                    <label class="music-switch"><input type="checkbox" id="musicAutoplayToggle" onchange="updateMusicAutoplay(this.checked)" /><span aria-hidden="true"></span></label>
+                  </div>
+                  <div class="music-control-row">
+                    <div class="music-control-label"><strong>Loop selected track</strong><span>Repeat the active track when it ends.</span></div>
+                    <label class="music-switch"><input type="checkbox" id="musicLoopToggle" onchange="updateMusicLoop(this.checked)" /><span aria-hidden="true"></span></label>
+                  </div>
+                  <div class="music-control-row">
+                    <div class="music-control-label"><strong>Volume</strong><span>Adjust the ambient playback level.</span></div>
+                    <div class="music-volume"><input type="range" id="musicVolumeRange" min="0" max="100" value="35" oninput="updateMusicVolume(this.value)" aria-label="Music volume" /><span class="music-volume-value" id="musicVolumeValue">35%</span></div>
+                  </div>
+                  <div class="music-actions">
+                    <button class="btn btn-primary" type="button" onclick="saveMusicSettings()" id="saveMusicBtn">Save Music</button>
+                    <button class="btn btn-ghost" type="button" onclick="resetMusicSettings()">Reset</button>
+                  </div>
+                  <p class="music-note">For production, use audio you own or have permission to stream. Uploaded tracks are stored under <code>media/music/</code>.</p>
+                </section>
+              </div>
+              <audio id="musicAudio" preload="metadata"></audio>
+            </div>
+          </div>
         </section>
         <section class="settings-tab-panel" id="settings-panel-bars" role="tabpanel" aria-labelledby="settings-tab-bars">
           <div class="settings-placeholder"><strong>Bars settings</strong><br />Configure status bars and dashboard indicators here.</div>
@@ -3738,6 +4122,8 @@
       const SETTINGS_TABS = ["appearance", "wallpapers", "general", "music", "bars"];
       let wallpaperPage = 1;
       let wallpaperCategory = "all";
+      let musicSettingsLoaded = false;
+      let musicSettings = { enabled: false, autoplay: false, loop: true, volume: 0.35, selectedTrackId: "", tracks: [] };
 
       function switchSettingsTab(tabName) {
         const activeTab = SETTINGS_TABS.includes(tabName) ? tabName : "appearance";
@@ -3754,6 +4140,268 @@
           else applyThemeToPage(themeSettings);
         }
         if (activeTab === "wallpapers") loadWallpaperPage(1, wallpaperCategory);
+        if (activeTab === "music" && !musicSettingsLoaded) loadMusicSettings();
+      }
+
+      async function loadMusicSettings() {
+        if (!isAdmin()) return;
+        try {
+          const response = await apiFetch("/api/music");
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "Music service unavailable");
+          musicSettings = result.music || musicSettings;
+          musicSettingsLoaded = true;
+          renderMusicTracks();
+          syncMusicControls();
+          applyMusicSettings(false);
+        } catch (error) {
+          showToast(error.message || "Unable to load music settings", "error");
+        }
+      }
+
+      function renderMusicTracks() {
+        const list = document.getElementById("musicTrackList");
+        if (!list) return;
+        list.innerHTML = "";
+        const tracks = Array.isArray(musicSettings.tracks) ? musicSettings.tracks : [];
+        if (!tracks.length) {
+          list.innerHTML = '<div class="music-empty">No music tracks yet. Add a URL or upload an audio file.</div>';
+          updateMusicNowPlaying();
+          return;
+        }
+        tracks.forEach((track) => {
+          const row = document.createElement("div");
+          row.className = `music-track-row${track.id === musicSettings.selectedTrackId ? " selected" : ""}`;
+          const select = document.createElement("button");
+          select.type = "button";
+          select.className = "music-track-select";
+          select.addEventListener("click", () => selectMusicTrack(track.id, true));
+          const name = document.createElement("span");
+          name.className = "music-track-name";
+          name.textContent = track.name || "Untitled track";
+          const source = document.createElement("span");
+          source.className = "music-track-source";
+          source.textContent = track.source === "upload" ? "Uploaded audio" : "External URL";
+          select.append(name, source);
+          const play = document.createElement("button");
+          play.type = "button";
+          play.className = "music-icon-btn";
+          play.title = "Play track";
+          play.setAttribute("aria-label", `Play ${track.name || "track"}`);
+          play.textContent = "▶";
+          play.addEventListener("click", () => selectMusicTrack(track.id, true));
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "music-icon-btn danger";
+          remove.title = "Delete track";
+          remove.setAttribute("aria-label", `Delete ${track.name || "track"}`);
+          remove.textContent = "×";
+          remove.addEventListener("click", () => deleteMusicTrack(track.id));
+          row.append(select, play, remove);
+          list.appendChild(row);
+        });
+        updateMusicNowPlaying();
+      }
+
+      function syncMusicControls() {
+        const enabled = document.getElementById("musicEnabledToggle");
+        const autoplay = document.getElementById("musicAutoplayToggle");
+        const loop = document.getElementById("musicLoopToggle");
+        const volume = document.getElementById("musicVolumeRange");
+        const value = Math.round((Number(musicSettings.volume) || 0) * 100);
+        if (enabled) enabled.checked = musicSettings.enabled === true;
+        if (autoplay) autoplay.checked = musicSettings.autoplay === true;
+        if (loop) loop.checked = musicSettings.loop !== false;
+        if (volume) volume.value = String(value);
+        const volumeLabel = document.getElementById("musicVolumeValue");
+        if (volumeLabel) volumeLabel.textContent = `${value}%`;
+        const playButton = document.getElementById("musicPlayBtn");
+        if (playButton) playButton.textContent = musicSettings.enabled ? "Pause selected" : "Play selected";
+        updateMusicStatus();
+      }
+
+      function selectedMusicTrack() {
+        return (musicSettings.tracks || []).find((track) => track.id === musicSettings.selectedTrackId) || null;
+      }
+
+      function updateMusicNowPlaying() {
+        const track = selectedMusicTrack();
+        const title = document.getElementById("musicNowPlaying");
+        const meta = document.getElementById("musicNowMeta");
+        if (title) title.textContent = track ? track.name : "No track selected";
+        if (meta) meta.textContent = track ? `${track.source === "upload" ? "Uploaded audio" : "External URL"} · ${Math.round((Number(musicSettings.volume) || 0) * 100)}% volume` : "Add a track to begin playback.";
+      }
+
+      function updateMusicStatus() {
+        const status = document.getElementById("musicStatus");
+        if (!status) return;
+        const audio = document.getElementById("musicAudio");
+        const playing = audio && !audio.paused && !audio.ended;
+        status.textContent = playing ? "Playing" : musicSettings.enabled ? "Enabled" : "Disabled";
+        status.classList.toggle("active", Boolean(playing || musicSettings.enabled));
+      }
+
+      function applyMusicSettings(shouldPlay = false) {
+        const audio = document.getElementById("musicAudio");
+        if (!audio) return;
+        const track = selectedMusicTrack();
+        audio.loop = musicSettings.loop !== false;
+        audio.volume = Math.min(1, Math.max(0, Number(musicSettings.volume) || 0));
+        if (track && audio.dataset.trackId !== track.id) {
+          audio.src = track.url;
+          audio.dataset.trackId = track.id;
+          audio.load();
+        }
+        updateMusicNowPlaying();
+        if (track && musicSettings.enabled && (shouldPlay || musicSettings.autoplay)) {
+          audio.play().catch(() => showToast("Playback needs a click in this browser.", "error"));
+        } else if (!musicSettings.enabled) {
+          audio.pause();
+        }
+        syncMusicControls();
+      }
+
+      function selectMusicTrack(trackId, shouldPlay = false) {
+        musicSettings.selectedTrackId = trackId;
+        musicSettings.enabled = shouldPlay ? true : musicSettings.enabled;
+        renderMusicTracks();
+        applyMusicSettings(shouldPlay);
+      }
+
+      function updateMusicEnabled(value) {
+        musicSettings.enabled = Boolean(value);
+        applyMusicSettings(musicSettings.enabled);
+      }
+
+      function updateMusicAutoplay(value) {
+        musicSettings.autoplay = Boolean(value);
+        syncMusicControls();
+      }
+
+      function updateMusicLoop(value) {
+        musicSettings.loop = Boolean(value);
+        const audio = document.getElementById("musicAudio");
+        if (audio) audio.loop = musicSettings.loop;
+        syncMusicControls();
+      }
+
+      function updateMusicVolume(value) {
+        musicSettings.volume = Math.min(1, Math.max(0, Number(value) / 100));
+        const audio = document.getElementById("musicAudio");
+        if (audio) audio.volume = musicSettings.volume;
+        syncMusicControls();
+        updateMusicNowPlaying();
+      }
+
+      function toggleMusicPlayback() {
+        const audio = document.getElementById("musicAudio");
+        const track = selectedMusicTrack();
+        if (!audio || !track) {
+          showToast("Add or select a music track first.", "error");
+          return;
+        }
+        if (audio.paused || audio.ended) {
+          musicSettings.enabled = true;
+          applyMusicSettings(true);
+        } else {
+          audio.pause();
+          musicSettings.enabled = false;
+          syncMusicControls();
+        }
+      }
+
+      async function addExternalMusicTrack() {
+        const urlInput = document.getElementById("musicTrackUrl");
+        const nameInput = document.getElementById("musicTrackName");
+        const url = (urlInput?.value || "").trim();
+        const name = (nameInput?.value || "").trim();
+        if (!url) {
+          showToast("Enter a direct audio URL first.", "error");
+          return;
+        }
+        try {
+          const response = await apiFetch("/api/music/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, url }) });
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "Unable to add track");
+          musicSettings = result.music;
+          urlInput.value = "";
+          nameInput.value = "";
+          musicSettingsLoaded = true;
+          renderMusicTracks();
+          syncMusicControls();
+          showToast("Music track added.", "success");
+        } catch (error) {
+          showToast(error.message || "Unable to add track", "error");
+        }
+      }
+
+      async function uploadMusicTrack(file) {
+        if (!file) return;
+        const form = new FormData();
+        form.append("file", file);
+        try {
+          const response = await apiFetch("/api/music/upload", { method: "POST", body: form });
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "Unable to upload audio");
+          musicSettings = result.music;
+          musicSettingsLoaded = true;
+          renderMusicTracks();
+          syncMusicControls();
+          showToast("Audio uploaded.", "success");
+        } catch (error) {
+          showToast(error.message || "Unable to upload audio", "error");
+        } finally {
+          const input = document.getElementById("musicFileInput");
+          if (input) input.value = "";
+        }
+      }
+
+      async function deleteMusicTrack(trackId) {
+        if (!window.confirm("Delete this music track?")) return;
+        try {
+          const response = await apiFetch(`/api/music/${encodeURIComponent(trackId)}`, { method: "DELETE" });
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "Unable to delete track");
+          const audio = document.getElementById("musicAudio");
+          if (audio?.dataset.trackId === trackId) {
+            audio.pause();
+            audio.removeAttribute("src");
+            delete audio.dataset.trackId;
+          }
+          musicSettings = result.music;
+          renderMusicTracks();
+          syncMusicControls();
+          applyMusicSettings(false);
+          showToast("Music track deleted.", "success");
+        } catch (error) {
+          showToast(error.message || "Unable to delete track", "error");
+        }
+      }
+
+      async function saveMusicSettings() {
+        const button = document.getElementById("saveMusicBtn");
+        if (button) button.disabled = true;
+        try {
+          const response = await apiFetch("/api/music", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ enabled: musicSettings.enabled, autoplay: musicSettings.autoplay, loop: musicSettings.loop, volume: musicSettings.volume, selectedTrackId: musicSettings.selectedTrackId }) });
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "Unable to save music settings");
+          musicSettings = result.music;
+          musicSettingsLoaded = true;
+          renderMusicTracks();
+          syncMusicControls();
+          applyMusicSettings(false);
+          showToast("Music settings saved.", "success");
+        } catch (error) {
+          showToast(error.message || "Unable to save music settings", "error");
+        } finally {
+          if (button) button.disabled = false;
+        }
+      }
+
+      function resetMusicSettings() {
+        musicSettings = { ...musicSettings, enabled: false, autoplay: false, loop: true, volume: 0.35 };
+        applyMusicSettings(false);
+        showToast("Music preferences reset. Click Save Music to persist.", "success");
       }
 
       function filterWallpaperLibrary() {
@@ -5240,6 +5888,7 @@
       loadSettings();
       loadCurrentUser().then(() => {
         switchView(viewFromPathname(), false);
+        if (isAdmin()) loadMusicSettings();
         refreshPresence();
       });
       document.addEventListener("visibilitychange", () => {
