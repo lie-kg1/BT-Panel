@@ -108,6 +108,12 @@ If you see `BASH_SOURCE[0]: unbound variable`, use the latest `menu.sh` and laun
 
 Copy `.env.example` to `.env` and set a strong `SESSION_SECRET` before using the app outside local development. Uploaded background files are stored in `media/`, profile pictures in `profile/`, and JSON data is stored in `data/`.
 
+## Vercel deployment
+
+The repository includes `vercel.json` and an exportable Express entry point for Vercel. Before deploying, set `OWNER_USERNAME`, `OWNER_EMAIL`, and `OWNER_PASSWORD` in the Vercel project’s Production environment variables. The password must be at least eight characters and should be unique to this deployment. On the first hosted invocation, BT Panel creates the owner from those variables; it does not ship a hard-coded administrator password.
+
+Vercel Functions use a writable temporary runtime directory for JSON state and uploads. That filesystem is ephemeral, so users, sessions, General/Bars/Music settings, and uploaded media are not durable across cold starts. Use a persistent Node host for the complete stateful panel, or add external database and object storage integrations before using Vercel for production data.
+
 ## Included routes
 
 | Route | Purpose |

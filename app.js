@@ -33,6 +33,9 @@ const BARS_FILE = path.join(DATA_DIR, "bars.json");
 const MUSIC_DIR = path.join(MEDIA_DIR, "music");
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "botpanel.sid";
 const SESSION_SECRET = process.env.SESSION_SECRET || "change-this-session-secret";
+const OWNER_USERNAME = String(process.env.OWNER_USERNAME || "admin").trim();
+const OWNER_EMAIL = String(process.env.OWNER_EMAIL || "").trim();
+const OWNER_PASSWORD = String(process.env.OWNER_PASSWORD || "");
 const PRESENCE_TIMEOUT_MS = 5 * 60 * 1000;
 const onlineSessions = new Map();
 
@@ -133,6 +136,33 @@ function validUsername(value) {
 function validEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
+
+function ensureHostedOwner() {
+  if (!IS_VERCEL || !OWNER_PASSWORD) return;
+  const data = loadUsers();
+  if (data.users.length > 0) return;
+  if (!validUsername(OWNER_USERNAME) || !validEmail(OWNER_EMAIL) || OWNER_PASSWORD.length < 8) {
+    console.warn("OWNER_USERNAME, OWNER_EMAIL, and OWNER_PASSWORD must be valid for hosted owner bootstrap.");
+    return;
+  }
+  const now = new Date().toISOString();
+  data.users.push({
+    id: crypto.randomUUID(),
+    username: OWNER_USERNAME,
+    email: OWNER_EMAIL,
+    passwordHash: bcrypt.hashSync(OWNER_PASSWORD, 10),
+    role: "owner",
+    status: "active",
+    profilePic: "",
+    bio: "",
+    createdAt: now,
+    lastLogin: null,
+    twoFactorEnabled: false,
+  });
+  saveUsers(data);
+}
+
+ensureHostedOwner();
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "10minutemail.com",
   "20minutemail.com",
