@@ -2455,6 +2455,125 @@
         text-align: center;
       }
 
+      .general-settings-grid,
+      .bars-settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .settings-field-card {
+        padding: 16px;
+        border: 1px solid rgba(137, 148, 176, 0.14);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.025);
+      }
+
+      .settings-field-card .form-group:last-child {
+        margin-bottom: 0;
+      }
+
+      .settings-preview {
+        margin-top: 16px;
+        padding: 15px;
+        border: 1px dashed rgba(137, 148, 176, 0.25);
+        border-radius: 12px;
+        background: rgba(8, 10, 18, 0.48);
+      }
+
+      .settings-preview-label {
+        margin-bottom: 9px;
+        color: var(--text-dim);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .settings-preview-title {
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .settings-preview-copy {
+        margin-top: 4px;
+        color: var(--text-dim);
+        font-size: 12px;
+      }
+
+      .bar-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px;
+        margin-top: 12px;
+      }
+
+      .bar-preview-item {
+        padding: 11px;
+        border: 1px solid rgba(137, 148, 176, 0.14);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.035);
+      }
+
+      .bar-preview-label {
+        color: var(--text-dim);
+        font-size: 10px;
+      }
+
+      .bar-preview-value {
+        margin-top: 5px;
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .settings-toggle-list {
+        display: grid;
+        gap: 0;
+      }
+
+      .settings-toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(137, 148, 176, 0.1);
+      }
+
+      .settings-toggle-row:first-child {
+        padding-top: 0;
+      }
+
+      .settings-toggle-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .settings-toggle-copy strong {
+        display: block;
+        color: var(--text-primary);
+        font-size: 13px;
+      }
+
+      .settings-toggle-copy span {
+        display: block;
+        margin-top: 3px;
+        color: var(--text-dim);
+        font-size: 11px;
+        line-height: 1.45;
+      }
+
+      @media (max-width: 700px) {
+        .general-settings-grid,
+        .bars-settings-grid,
+        .bar-preview-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
       .music-studio-grid {
         display: grid;
         grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
@@ -2809,7 +2928,7 @@
         <div class="sidebar-tools">
           <div class="sidebar-brand" aria-label="BT PANEL">
             <img class="brand-mark" src="/gemini-svg.svg" alt="BT PANEL" />
-            <span class="brand-text">BT PANEL</span>
+            <span class="brand-text" id="panelBrandName">BT PANEL</span>
           </div>
           <button
             class="sidebar-collapse-btn"
@@ -3121,7 +3240,8 @@
         >
           <div class="card">
             <div class="card-toolbar">
-              <span class="card-title">Welcome</span>
+              <span class="card-title" id="homeWelcomeTitle">Welcome</span>
+              <span class="card-toolbar-subtitle" id="homePanelSubtitle">Control center</span>
             </div>
             <div class="card-body" style="min-height: auto">
               <p
@@ -3134,7 +3254,10 @@
                 Hello
                 <strong id="dash-username" style="color: var(--text-primary)"
                   >—</strong
-                >. You are signed in as a <span id="dash-role">—</span>.
+                >. <span id="homeWelcomeMessage">Manage your panel from one place.</span>
+              </p>
+              <p id="homeRolePhrase" style="font-size: 13px; color: var(--text-dim); margin: -6px 0 16px 0;">
+                You are signed in as <span id="dash-role">—</span>.
               </p>
               <div
                 id="home-admin-stats"
@@ -3164,10 +3287,10 @@
                 </div>
               </div>
               <div class="dash-grid-2">
-                <div class="dash-stat">
-                  <div class="dash-stat-label">Panel Version</div>
-                  <div class="dash-stat-value mono">v2.1.1</div>
-                </div>
+                  <div class="dash-stat" id="home-version-stat">
+                    <div class="dash-stat-label">Panel Version</div>
+                    <div class="dash-stat-value mono">v2.1.1</div>
+                  </div>
               </div>
             </div>
           </div>
@@ -3488,7 +3611,50 @@
         </section>
 
         <section class="settings-tab-panel" id="settings-panel-general" role="tabpanel" aria-labelledby="settings-tab-general">
-          <div class="settings-placeholder"><strong>General settings</strong><br />Panel identity and global defaults will appear here.</div>
+          <div class="card">
+            <div class="card-toolbar settings-card-heading">
+              <div>
+                <h2>General Settings</h2>
+                <p>Set the panel identity and the message shown on the home dashboard.</p>
+              </div>
+              <span class="role-badge">Administrator</span>
+            </div>
+            <div class="card-body">
+              <div class="general-settings-grid">
+                <div class="settings-field-card">
+                  <div class="form-group">
+                    <label class="form-label" for="generalPanelName">Panel name</label>
+                    <input class="input" id="generalPanelName" type="text" maxlength="48" placeholder="BT PANEL" oninput="updateGeneralText('panelName', this.value)" />
+                    <div class="form-hint">Shown in the sidebar and browser title.</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="generalPanelSubtitle">Panel subtitle</label>
+                    <input class="input" id="generalPanelSubtitle" type="text" maxlength="120" placeholder="Control center" oninput="updateGeneralText('panelSubtitle', this.value)" />
+                    <div class="form-hint">Short context shown beside the Welcome heading.</div>
+                  </div>
+                </div>
+                <div class="settings-field-card">
+                  <div class="form-group">
+                    <label class="form-label" for="generalWelcomeTitle">Welcome title</label>
+                    <input class="input" id="generalWelcomeTitle" type="text" maxlength="80" placeholder="Welcome" oninput="updateGeneralText('welcomeTitle', this.value)" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="generalWelcomeMessage">Welcome message</label>
+                    <textarea class="input" id="generalWelcomeMessage" maxlength="240" rows="3" placeholder="Manage your panel from one place." oninput="updateGeneralText('welcomeMessage', this.value)"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-preview">
+                <div class="settings-preview-label">Live home preview</div>
+                <div class="settings-preview-title" id="generalPreviewTitle">Welcome</div>
+                <div class="settings-preview-copy" id="generalPreviewCopy">Manage your panel from one place.</div>
+              </div>
+              <div class="theme-actions">
+                <button class="btn btn-primary" type="button" onclick="saveGeneralSettings()" id="saveGeneralBtn">Save General</button>
+                <button class="btn btn-ghost" type="button" onclick="resetGeneralSettings()">Reset</button>
+              </div>
+            </div>
+          </div>
         </section>
         <section class="settings-tab-panel" id="settings-panel-music" role="tabpanel" aria-labelledby="settings-tab-music">
           <div class="card">
@@ -3565,7 +3731,51 @@
           </div>
         </section>
         <section class="settings-tab-panel" id="settings-panel-bars" role="tabpanel" aria-labelledby="settings-tab-bars">
-          <div class="settings-placeholder"><strong>Bars settings</strong><br />Configure status bars and dashboard indicators here.</div>
+          <div class="card">
+            <div class="card-toolbar settings-card-heading">
+              <div>
+                <h2>Bars Settings</h2>
+                <p>Choose which dashboard indicators and account details are visible on Home.</p>
+              </div>
+              <span class="role-badge">Administrator</span>
+            </div>
+            <div class="card-body">
+              <div class="bars-settings-grid">
+                <div class="settings-field-card settings-toggle-list">
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><strong>Show admin statistics</strong><span>Total users, Appearance, and User Management cards.</span></div>
+                    <label class="music-switch"><input type="checkbox" id="barsAdminStatsToggle" onchange="updateBarsSetting('showAdminStats', this.checked)" /><span aria-hidden="true"></span></label>
+                  </div>
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><strong>Show panel version</strong><span>Display the current BT Panel version in the home summary.</span></div>
+                    <label class="music-switch"><input type="checkbox" id="barsVersionToggle" onchange="updateBarsSetting('showVersion', this.checked)" /><span aria-hidden="true"></span></label>
+                  </div>
+                </div>
+                <div class="settings-field-card settings-toggle-list">
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><strong>Show role phrase</strong><span>Show the signed-in account role below the welcome message.</span></div>
+                    <label class="music-switch"><input type="checkbox" id="barsRoleToggle" onchange="updateBarsSetting('showRole', this.checked)" /><span aria-hidden="true"></span></label>
+                  </div>
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><strong>Show header account</strong><span>Keep the account avatar and role menu visible in the top header.</span></div>
+                    <label class="music-switch"><input type="checkbox" id="barsHeaderUserToggle" onchange="updateBarsSetting('showHeaderUser', this.checked)" /><span aria-hidden="true"></span></label>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-preview">
+                <div class="settings-preview-label">Visible home bars</div>
+                <div class="bar-preview-grid">
+                  <div class="bar-preview-item"><div class="bar-preview-label">Admin stats</div><div class="bar-preview-value" id="barsPreviewAdminStats">ON</div></div>
+                  <div class="bar-preview-item"><div class="bar-preview-label">Version</div><div class="bar-preview-value" id="barsPreviewVersion">ON</div></div>
+                  <div class="bar-preview-item"><div class="bar-preview-label">Role / header</div><div class="bar-preview-value" id="barsPreviewAccount">ON / ON</div></div>
+                </div>
+              </div>
+              <div class="theme-actions">
+                <button class="btn btn-primary" type="button" onclick="saveBarsSettings()" id="saveBarsBtn">Save Bars</button>
+                <button class="btn btn-ghost" type="button" onclick="resetBarsSettings()">Reset</button>
+              </div>
+            </div>
+          </div>
         </section>
           </div>
         </div>
@@ -4124,6 +4334,10 @@
       let wallpaperCategory = "all";
       let musicSettingsLoaded = false;
       let musicSettings = { enabled: false, autoplay: false, loop: true, volume: 0.35, selectedTrackId: "", tracks: [] };
+      let generalSettingsLoaded = false;
+      let generalSettings = { panelName: "BT PANEL", panelSubtitle: "Control center", welcomeTitle: "Welcome", welcomeMessage: "Manage your panel from one place." };
+      let barsSettingsLoaded = false;
+      let barsSettings = { showAdminStats: true, showVersion: true, showRole: true, showHeaderUser: true };
 
       function switchSettingsTab(tabName) {
         const activeTab = SETTINGS_TABS.includes(tabName) ? tabName : "appearance";
@@ -4141,6 +4355,164 @@
         }
         if (activeTab === "wallpapers") loadWallpaperPage(1, wallpaperCategory);
         if (activeTab === "music" && !musicSettingsLoaded) loadMusicSettings();
+        if (activeTab === "general" && !generalSettingsLoaded) loadGeneralSettings();
+        if (activeTab === "bars" && !barsSettingsLoaded) loadBarsSettings();
+      }
+
+      async function loadGeneralSettings() {
+        if (!currentUser) return;
+        try {
+          const response = await apiFetch("/api/general");
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "General settings unavailable");
+          generalSettings = result.general || generalSettings;
+          generalSettingsLoaded = true;
+          applyGeneralSettings();
+        } catch (error) {
+          showToast(error.message || "Unable to load General settings", "error");
+        }
+      }
+
+      function syncGeneralControls() {
+        const fields = {
+          generalPanelName: generalSettings.panelName,
+          generalPanelSubtitle: generalSettings.panelSubtitle,
+          generalWelcomeTitle: generalSettings.welcomeTitle,
+          generalWelcomeMessage: generalSettings.welcomeMessage,
+        };
+        Object.entries(fields).forEach(([id, value]) => {
+          const element = document.getElementById(id);
+          if (element && document.activeElement !== element) element.value = value || "";
+        });
+        const previewTitle = document.getElementById("generalPreviewTitle");
+        const previewCopy = document.getElementById("generalPreviewCopy");
+        if (previewTitle) previewTitle.textContent = generalSettings.welcomeTitle;
+        if (previewCopy) previewCopy.textContent = generalSettings.welcomeMessage;
+      }
+
+      function applyGeneralSettings() {
+        const name = generalSettings.panelName || "BT PANEL";
+        const subtitle = generalSettings.panelSubtitle || "Control center";
+        const title = generalSettings.welcomeTitle || "Welcome";
+        const message = generalSettings.welcomeMessage || "Manage your panel from one place.";
+        const brand = document.getElementById("panelBrandName");
+        const brandContainer = document.querySelector(".sidebar-brand");
+        const subtitleEl = document.getElementById("homePanelSubtitle");
+        const welcomeTitle = document.getElementById("homeWelcomeTitle");
+        const welcomeMessage = document.getElementById("homeWelcomeMessage");
+        if (brand) brand.textContent = name;
+        if (brandContainer) brandContainer.setAttribute("aria-label", name);
+        if (subtitleEl) subtitleEl.textContent = subtitle;
+        if (welcomeTitle) welcomeTitle.textContent = title;
+        if (welcomeMessage) welcomeMessage.textContent = message;
+        document.title = name;
+        syncGeneralControls();
+      }
+
+      function updateGeneralText(key, value) {
+        if (!Object.prototype.hasOwnProperty.call(generalSettings, key)) return;
+        const maxLength = key === "welcomeMessage" ? 240 : key === "panelSubtitle" ? 120 : key === "panelName" ? 48 : 80;
+        generalSettings[key] = String(value || "").slice(0, maxLength);
+        applyGeneralSettings();
+      }
+
+      async function saveGeneralSettings() {
+        const button = document.getElementById("saveGeneralBtn");
+        if (button) button.disabled = true;
+        try {
+          const response = await apiFetch("/api/general", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(generalSettings) });
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "Unable to save General settings");
+          generalSettings = result.general || generalSettings;
+          generalSettingsLoaded = true;
+          applyGeneralSettings();
+          showToast("General settings saved.", "success");
+        } catch (error) {
+          showToast(error.message || "Unable to save General settings", "error");
+        } finally {
+          if (button) button.disabled = false;
+        }
+      }
+
+      function resetGeneralSettings() {
+        generalSettings = { panelName: "BT PANEL", panelSubtitle: "Control center", welcomeTitle: "Welcome", welcomeMessage: "Manage your panel from one place." };
+        applyGeneralSettings();
+        showToast("General settings reset. Click Save General to persist.", "success");
+      }
+
+      async function loadBarsSettings() {
+        if (!currentUser) return;
+        try {
+          const response = await apiFetch("/api/bars");
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "Bars settings unavailable");
+          barsSettings = result.bars || barsSettings;
+          barsSettingsLoaded = true;
+          applyBarsSettings();
+        } catch (error) {
+          showToast(error.message || "Unable to load Bars settings", "error");
+        }
+      }
+
+      function syncBarsControls() {
+        const controls = {
+          barsAdminStatsToggle: barsSettings.showAdminStats !== false,
+          barsVersionToggle: barsSettings.showVersion !== false,
+          barsRoleToggle: barsSettings.showRole !== false,
+          barsHeaderUserToggle: barsSettings.showHeaderUser !== false,
+        };
+        Object.entries(controls).forEach(([id, checked]) => {
+          const element = document.getElementById(id);
+          if (element) element.checked = checked;
+        });
+        const admin = document.getElementById("barsPreviewAdminStats");
+        const version = document.getElementById("barsPreviewVersion");
+        const account = document.getElementById("barsPreviewAccount");
+        if (admin) admin.textContent = barsSettings.showAdminStats !== false ? "ON" : "OFF";
+        if (version) version.textContent = barsSettings.showVersion !== false ? "ON" : "OFF";
+        if (account) account.textContent = `${barsSettings.showRole !== false ? "ON" : "OFF"} / ${barsSettings.showHeaderUser !== false ? "ON" : "OFF"}`;
+      }
+
+      function applyBarsSettings() {
+        const adminStats = document.getElementById("home-admin-stats");
+        const version = document.getElementById("home-version-stat");
+        const role = document.getElementById("homeRolePhrase");
+        const headerUser = document.getElementById("headerUser");
+        if (adminStats) adminStats.style.display = isAdmin() && barsSettings.showAdminStats !== false ? "" : "none";
+        if (version) version.style.display = barsSettings.showVersion !== false ? "" : "none";
+        if (role) role.style.display = barsSettings.showRole !== false ? "" : "none";
+        if (headerUser) headerUser.style.display = barsSettings.showHeaderUser !== false ? "" : "none";
+        syncBarsControls();
+      }
+
+      function updateBarsSetting(key, value) {
+        if (!Object.prototype.hasOwnProperty.call(barsSettings, key)) return;
+        barsSettings[key] = Boolean(value);
+        applyBarsSettings();
+      }
+
+      async function saveBarsSettings() {
+        const button = document.getElementById("saveBarsBtn");
+        if (button) button.disabled = true;
+        try {
+          const response = await apiFetch("/api/bars", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(barsSettings) });
+          const result = await response.json();
+          if (!response.ok || !result.success) throw new Error(result.message || "Unable to save Bars settings");
+          barsSettings = result.bars || barsSettings;
+          barsSettingsLoaded = true;
+          applyBarsSettings();
+          showToast("Bars settings saved.", "success");
+        } catch (error) {
+          showToast(error.message || "Unable to save Bars settings", "error");
+        } finally {
+          if (button) button.disabled = false;
+        }
+      }
+
+      function resetBarsSettings() {
+        barsSettings = { showAdminStats: true, showVersion: true, showRole: true, showHeaderUser: true };
+        applyBarsSettings();
+        showToast("Bars settings reset. Click Save Bars to persist.", "success");
       }
 
       async function loadMusicSettings() {
@@ -4608,7 +4980,7 @@
               ".nav-section-label.admin-only"
             );
             if (adminSection)
-              adminSection.style.display = isAdmin() ? "" : "none";
+              adminSection.style.display = isAdmin() && barsSettings.showAdminStats !== false ? "" : "none";
             applyNavigationVisibility();
             // Dashboard label stays as Dashboard for all
             const homeNav = document.getElementById("nav-home");
@@ -5012,7 +5384,7 @@
         const adminStats = document.getElementById("home-admin-stats");
         if (adminStats) {
           if (isAdmin()) {
-            adminStats.style.display = "block";
+            adminStats.style.display = barsSettings.showAdminStats !== false ? "block" : "none";
             try {
               const res = await apiFetch("/api/users");
               const data = await res.json();
@@ -5888,6 +6260,8 @@
       loadSettings();
       loadCurrentUser().then(() => {
         switchView(viewFromPathname(), false);
+        loadGeneralSettings();
+        loadBarsSettings();
         if (isAdmin()) loadMusicSettings();
         refreshPresence();
       });
