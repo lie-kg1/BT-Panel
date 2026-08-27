@@ -77,13 +77,16 @@ show_menu() {
   printf '%b%s%b\n' "$CYAN" '🔹 4) Run project checks' "$RESET"
   printf '%b%s%b\n' "$CYAN" '🔹 5) Start production server' "$RESET"
   printf '%b%s%b\n' "$CYAN" '🔹 6) Start development server' "$RESET"
-  printf '%b%s%b\n' "$YELLOW" '🔹 7) Exit' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 7) Install Pterodactyl Panel' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 8) Install Wings node' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 9) Install Pterodactyl Panel + Wings' "$RESET"
+  printf '%b%s%b\n' "$YELLOW" '🔹 10) Exit' "$RESET"
   printf '%b%s%b\n' "$BLUE" '========================================' "$RESET"
 }
 
 while true; do
   show_menu
-  read -r -p "${CYAN}👉 Choose an option [1-7]: ${RESET}" choice || {
+  read -r -p "${CYAN}👉 Choose an option [1-10]: ${RESET}" choice || {
     printf '\n'
     info 'Exiting.'
     exit 0
@@ -119,6 +122,21 @@ while true; do
       exec npm run dev
       ;;
     7)
+      require_project || { pause; continue; }
+      PTERODACTYL_INSTALL_CONFIRM=YES bash "$ROOT_DIR/install.sh" --pterodactyl-panel
+      pause
+      ;;
+    8)
+      require_project || { pause; continue; }
+      WINGS_INSTALL_CONFIRM=YES bash "$ROOT_DIR/install.sh" --wings
+      pause
+      ;;
+    9)
+      require_project || { pause; continue; }
+      PTERODACTYL_INSTALL_CONFIRM=YES WINGS_INSTALL_CONFIRM=YES bash "$ROOT_DIR/install.sh" --pterodactyl
+      pause
+      ;;
+    10)
       success 'Goodbye.'
       exit 0
       ;;

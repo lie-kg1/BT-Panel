@@ -65,6 +65,18 @@ Open <http://localhost:3000/>. The `/` route serves the dashboard for authentica
 
 If you see `BASH_SOURCE[0]: unbound variable`, use the latest `menu.sh` and launch it with the direct command shown above. The launcher now handles execution through `bash -c` safely. If npm reports that `package.json` or a menu script cannot be found, the command was started outside the BT Panel directory; run `cd /path/to/BT-Panel` first. Do not append `7` to the shell command. Enter `7` only after the menu is displayed.
 
+### Pterodactyl Panel and Wings installers
+
+The repository includes guarded host installers for the official Pterodactyl Panel and Wings node daemon. These commands are intended for a supported Debian/Ubuntu Linux VPS, not CodeSandbox or a normal shared web host. They install system packages and services, so review the scripts and run them only on a dedicated host where you have root access.
+
+| Command | Result |
+| --- | --- |
+| `PTERODACTYL_INSTALL_CONFIRM=YES sudo ./install.sh --pterodactyl-panel` | Installs Panel dependencies and downloads the Panel release into `/var/www/pterodactyl`. |
+| `WINGS_INSTALL_CONFIRM=YES sudo ./install.sh --wings` | Installs Docker and Wings, creates the `wings.service` unit, and waits for Panel-generated `config.yml`. |
+| `PTERODACTYL_INSTALL_CONFIRM=YES WINGS_INSTALL_CONFIRM=YES sudo ./install.sh --pterodactyl` | Runs both guarded installers in sequence. |
+
+The interactive `./menu.sh` exposes the same options. The Panel installer deliberately stops before database, application-key, TLS, and queue configuration. The Wings installer deliberately does not invent a node configuration: create the node in Pterodactyl Panel, copy the generated configuration to `/etc/pterodactyl/config.yml`, test with `wings --debug`, and only then enable the service. See the [official Panel guide](https://pterodactyl.io/panel/1.0/getting_started.html) and [official Wings guide](https://pterodactyl.io/wings/1.0/installing.html).
+
 ## Configuration
 
 Copy `.env.example` to `.env` and set a strong `SESSION_SECRET` before using the app outside local development. Uploaded background files are stored in `media/`, profile pictures in `profile/`, and JSON data is stored in `data/`.
