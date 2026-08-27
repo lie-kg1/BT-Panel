@@ -39,11 +39,34 @@ if ! command -v apt-get >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ -r /etc/os-release ]]; then
+  . /etc/os-release
+fi
+
 apt-get update -y
+DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl git tar unzip nginx mariadb-server redis-server
+
+php_version="${PTERODACTYL_PHP_VERSION:-8.3}"
+if ! apt-cache show "php${php_version}-cli" >/dev/null 2>&1; then
+  if apt-cache show php8.2-cli >/dev/null 2>&1; then
+    php_version="8.2"
+  elif [[ "${ID:-}" == "ubuntu" && "${VERSION_ID:-}" == "22.04" ]]; then
+    echo "PHP ${php_version} is not available in Ubuntu 22.04 repositories; enabling the documented ondrej/php repository."
+    DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common lsb-release
+    add-apt-repository -y ppa:ondrej/php
+    apt-get update -y
+  fi
+fi
+
+if ! apt-cache show "php${php_version}-cli" >/dev/null 2>&1; then
+  echo "Error: PHP ${php_version} packages are unavailable. Set PTERODACTYL_PHP_VERSION to an available PHP 8.2/8.3 version or configure a supported PHP repository." >&2
+  exit 1
+fi
+
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  ca-certificates curl git tar unzip nginx mariadb-server redis-server \
-  php8.3 php8.3-cli php8.3-fpm php8.3-gd php8.3-mysql php8.3-mbstring \
-  php8.3-bcmath php8.3-xml php8.3-curl php8.3-zip
+  "php${php_version}" "php${php_version}-cli" "php${php_version}-fpm" "php${php_version}-gd" \
+  "php${php_version}-mysql" "php${php_version}-mbstring" "php${php_version}-bcmath" \
+  "php${php_version}-xml" "php${php_version}-curl" "php${php_version}-zip"
 
 if ! command -v composer >/dev/null 2>&1; then
   curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -57,7 +80,7 @@ rm -f panel.tar.gz
 chmod -R 755 storage bootstrap/cache
 chown -R www-data:www-data /var/www/pterodactyl
 
-systemctl enable --now mariadb redis-server php8.3-fpm nginx
+systemctl enable --now mariadb redis-server "php${php_version}-fpm" nginx
 
 cat <<'NEXT'
 Pterodactyl Panel files and dependencies are installed.

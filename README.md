@@ -75,7 +75,7 @@ The repository includes guarded host installers for the official Pterodactyl Pan
 | `WINGS_INSTALL_CONFIRM=YES sudo ./install.sh --wings` | Installs Docker and Wings, creates the `wings.service` unit, and waits for Panel-generated `config.yml`. |
 | `PTERODACTYL_INSTALL_CONFIRM=YES WINGS_INSTALL_CONFIRM=YES sudo ./install.sh --pterodactyl` | Runs both guarded installers in sequence. |
 
-The interactive `./menu.sh` exposes the same options. The Panel installer deliberately stops before database, application-key, TLS, and queue configuration. The Wings installer deliberately does not invent a node configuration: create the node in Pterodactyl Panel, copy the generated configuration to `/etc/pterodactyl/config.yml`, test with `wings --debug`, and only then enable the service. See the [official Panel guide](https://pterodactyl.io/panel/1.0/getting_started.html) and [official Wings guide](https://pterodactyl.io/wings/1.0/installing.html).
+The interactive `./menu.sh` exposes the same options. The Panel installer deliberately stops before database, application-key, TLS, and queue configuration. On Ubuntu 22.04, where PHP 8.3 is not in the default repositories, it enables the documented `ondrej/php` repository; on other supported systems it uses an available PHP 8.2/8.3 package or stops with a clear error. The Wings installer deliberately does not invent a node configuration: create the node in Pterodactyl Panel, copy the generated configuration to `/etc/pterodactyl/config.yml`, test with `wings --debug`, and only then enable the service. See the [official Panel guide](https://pterodactyl.io/panel/1.0/getting_started.html) and [official Wings guide](https://pterodactyl.io/wings/1.0/installing.html).
 
 ## Configuration
 
