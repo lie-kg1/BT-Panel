@@ -3356,6 +3356,11 @@
             <span class="nav-label">Home</span>
           </button>
 
+          <button class="nav-item" id="nav-infrastructure" onclick="switchView('infrastructure')" aria-label="Pterodactyl" role="tab" aria-selected="false">
+            <svg width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M7 8h10M7 12h10M7 16h6"></path><circle cx="17" cy="16" r="1"></circle></svg>
+            <span class="nav-label">Pterodactyl</span>
+          </button>
+
           <button
             class="nav-item"
             id="nav-team"
@@ -4182,6 +4187,17 @@
           </div>
         </div>
 
+        <!-- Pterodactyl / Wings / Docker View -->
+        <div id="view-infrastructure" class="view" role="tabpanel" aria-labelledby="nav-infrastructure">
+          <div class="infra-hero card">
+            <div class="infra-hero-copy"><div class="infra-eyebrow"><span class="infra-pulse"></span> Control plane</div><h1>Pterodactyl infrastructure</h1><p>Monitor Wings nodes, Docker runtimes, and every hosted server from one focused dashboard.</p><div class="infra-hero-meta"><span class="infra-mode" id="infraModeBadge">Demo data</span><span id="infraLastSync">Awaiting first sync</span></div></div>
+            <div class="infra-hero-actions"><button class="btn btn-ghost" type="button" onclick="loadInfrastructure()">Refresh</button><button class="btn btn-primary admin-only" id="infraSyncBtn" type="button" onclick="syncInfrastructure()" style="display:none">Sync control plane</button></div>
+          </div>
+          <div class="infra-stat-grid"><div class="infra-stat card"><span>Wings nodes</span><strong id="infraNodeCount">—</strong><small id="infraNodeHint">—</small></div><div class="infra-stat card"><span>Running servers</span><strong id="infraRunningCount">—</strong><small id="infraServerHint">—</small></div><div class="infra-stat card"><span>Fleet CPU</span><strong id="infraCpuValue">—</strong><small>Across online nodes</small></div><div class="infra-stat card"><span>Memory allocated</span><strong id="infraMemoryValue">—</strong><small id="infraMemoryHint">—</small></div></div>
+          <div class="infra-main-grid"><section class="card infra-panel"><div class="card-toolbar infra-toolbar"><div><span class="card-title">Wings nodes</span><p>Daemon health and Docker capacity</p></div><span class="infra-section-badge">LIVE SNAPSHOT</span></div><div class="infra-node-grid" id="infraNodeGrid"><div class="infra-empty">Loading node health…</div></div></section><aside class="card infra-panel"><div class="card-toolbar infra-toolbar"><div><span class="card-title">Activity</span><p>Latest control-plane events</p></div></div><div class="infra-activity-list" id="infraActivityFeed"><div class="infra-empty">Loading activity…</div></div></aside></div>
+          <section class="card infra-panel infra-servers-panel"><div class="card-toolbar infra-toolbar"><div><span class="card-title">Server fleet</span><p>Power controls and Docker allocations</p></div><button class="btn btn-ghost admin-only" id="infraCreateToggle" type="button" onclick="toggleInfrastructureCreateForm()" style="display:none">+ Add server</button></div><div class="infra-create-form" id="infraCreateForm"><div class="infra-create-grid"><input class="input" id="infraNewName" type="text" placeholder="Server name" maxlength="80" /><input class="input" id="infraNewGame" type="text" placeholder="Egg / game" maxlength="48" /><select class="input" id="infraNewNode"></select><input class="input" id="infraNewMemory" type="number" min="0.1" step="0.1" value="2" placeholder="Memory GB" /><input class="input" id="infraNewDisk" type="number" min="0.1" step="0.1" value="20" placeholder="Disk GB" /><input class="input" id="infraNewAllocation" type="text" placeholder="Allocation host:port" maxlength="80" /></div><div class="infra-create-actions"><button class="btn btn-primary" type="button" onclick="createInfrastructureServer()">Create server</button><button class="btn btn-ghost" type="button" onclick="toggleInfrastructureCreateForm(false)">Cancel</button></div></div><div class="infra-server-list" id="infraServerList"><div class="infra-empty">Loading server fleet…</div></div></section>
+        </div>
+
         <!-- Team View -->
         <div
           id="view-team"
@@ -4658,6 +4674,7 @@
         settings: "Admin Settings",
         users: "User Accounts",
         account: "My Profile",
+        infrastructure: "Pterodactyl Infrastructure",
       };
       const VIEW_PATHS = {
         home: "/",
@@ -4665,6 +4682,7 @@
         settings: "/settings",
         users: "/users",
         account: "/account",
+        infrastructure: "/pterodactyl",
       };
 
       function viewFromPathname() {
@@ -4728,6 +4746,7 @@
         if (viewName === "account") renderAccountInfo();
         if (viewName === "users") fetchUsers();
         if (viewName === "team") fetchTeam();
+        if (viewName === "infrastructure") { applyInfrastructurePermissions(); loadInfrastructure(); }
         if (viewName === "settings") {
           const requestedTab = new URLSearchParams(window.location.search).get("tab");
           switchSettingsTab(SETTINGS_TABS.includes(requestedTab) ? requestedTab : "appearance");
@@ -4744,6 +4763,8 @@
       let generalSettings = { panelName: "BT PANEL", panelSubtitle: "", welcomeTitle: "Welcome", welcomeMessage: "Manage your panel from one place." };
       let barsSettingsLoaded = false;
       let barsSettings = { showAdminStats: true, showVersion: true, showRole: true, showHeaderUser: true };
+      let infrastructureLoaded = false;
+      let infrastructureState = { mode: "demo", lastSync: 0, nodes: [], servers: [], activity: [] };
 
       function switchSettingsTab(tabName) {
         const activeTab = SETTINGS_TABS.includes(tabName) ? tabName : "appearance";
@@ -4764,6 +4785,30 @@
         if (activeTab === "general" && !generalSettingsLoaded) loadGeneralSettings();
         if (activeTab === "bars" && !barsSettingsLoaded) loadBarsSettings();
       }
+
+
+
+      function applyInfrastructurePermissions() {
+        document.querySelectorAll("#view-infrastructure .admin-only").forEach((element) => { element.style.display = isAdmin() ? "" : "none"; });
+      }
+      function infraBadge(status) { const value = String(status || "offline"); return `<span class="infra-status infra-status-${escapeHtml(value)}"><span></span>${escapeHtml(value === "maintenance" ? "MAINTENANCE" : value.toUpperCase())}</span>`; }
+      function infraMeter(value, limit, tone) { const percent = Math.min(100, Math.max(0, (Number(value) / Math.max(.1, Number(limit))) * 100)); return `<div class="infra-meter"><span class="infra-meter-fill ${tone || "accent"}" style="width:${percent.toFixed(1)}%"></span></div>`; }
+      function renderInfrastructure() {
+        const nodes = infrastructureState.nodes || []; const servers = infrastructureState.servers || []; const activity = infrastructureState.activity || [];
+        const online = nodes.filter((node) => node.status === "online"); const running = servers.filter((server) => server.status === "running"); const cpu = online.length ? Math.round(online.reduce((sum, node) => sum + Number(node.cpu || 0), 0) / online.length) : 0; const memUsed = nodes.reduce((sum, node) => sum + Number(node.memoryUsed || 0), 0); const memTotal = nodes.reduce((sum, node) => sum + Number(node.memoryTotal || 0), 0);
+        const set = (id, value) => { const element = document.getElementById(id); if (element) element.textContent = value; };
+        set("infraNodeCount", nodes.length); set("infraNodeHint", `${online.length} online · ${nodes.length - online.length} attention`); set("infraRunningCount", running.length); set("infraServerHint", `${servers.length} total servers`); set("infraCpuValue", `${cpu}%`); set("infraMemoryValue", `${memUsed.toFixed(0)} GB`); set("infraMemoryHint", `${memTotal.toFixed(0)} GB across nodes`); set("infraLastSync", infrastructureState.lastSync ? `Last synced ${formatDate(infrastructureState.lastSync)}` : "Awaiting first sync");
+        const mode = document.getElementById("infraModeBadge"); if (mode) { mode.textContent = infrastructureState.mode === "configured" ? "Configured metadata" : "Demo data"; mode.classList.toggle("configured", infrastructureState.mode === "configured"); }
+        const nodeGrid = document.getElementById("infraNodeGrid"); if (nodeGrid) nodeGrid.innerHTML = nodes.length ? nodes.map((node) => `<article class="infra-node-card"><div class="infra-node-head"><div><strong>${escapeHtml(node.name)}</strong><span>${escapeHtml(node.location)}</span></div>${infraBadge(node.status)}</div><div class="infra-node-address"><span>${escapeHtml(node.address)}</span><span>Uptime ${escapeHtml(node.uptime)}</span></div><div class="infra-node-metric"><div><span>CPU</span><b>${node.cpu}%</b></div>${infraMeter(node.cpu, 100, node.cpu > 80 ? "danger" : "accent")}</div><div class="infra-node-metric"><div><span>Memory</span><b>${node.memoryUsed} / ${node.memoryTotal} GB</b></div>${infraMeter(node.memoryUsed, node.memoryTotal, "violet")}</div><div class="infra-node-footer"><span>Wings ${escapeHtml(node.wings)}</span><span>Docker ${escapeHtml(node.docker)}</span></div></article>`).join("") : '<div class="infra-empty">No Wings nodes configured.</div>';
+        const feed = document.getElementById("infraActivityFeed"); if (feed) feed.innerHTML = activity.length ? activity.map((event) => `<div class="infra-activity-item"><span class="infra-activity-dot ${escapeHtml(event.tone)}"></span><div><p>${escapeHtml(event.text)}</p><time>${formatDate(event.ts)}</time></div></div>`).join("") : '<div class="infra-empty">No recent activity.</div>';
+        const select = document.getElementById("infraNewNode"); if (select) select.innerHTML = nodes.map((node) => `<option value="${escapeHtml(node.id)}">${escapeHtml(node.name)} · ${escapeHtml(node.location)}</option>`).join("");
+        const list = document.getElementById("infraServerList"); if (list) list.innerHTML = servers.length ? servers.map((server) => { const node = nodes.find((candidate) => candidate.id === server.nodeId) || { name: "Unassigned" }; const actions = isAdmin() ? `<div class="infra-server-actions"><button class="infra-action-btn" onclick="infrastructurePowerAction('${escapeHtml(server.id)}','start')">Start</button><button class="infra-action-btn" onclick="infrastructurePowerAction('${escapeHtml(server.id)}','restart')">Restart</button><button class="infra-action-btn danger" onclick="infrastructurePowerAction('${escapeHtml(server.id)}','stop')">Stop</button></div>` : '<span class="infra-readonly">Read-only access</span>'; return `<article class="infra-server-row"><div class="infra-server-main"><div class="infra-server-title"><div class="infra-game-mark">${escapeHtml((server.game || "G").slice(0, 1).toUpperCase())}</div><div><strong>${escapeHtml(server.name)}</strong><span>${escapeHtml(server.game)} · ${escapeHtml(server.identifier)}</span></div></div>${infraBadge(server.status)}<div class="infra-server-node"><span>Wings node</span><b>${escapeHtml(node.name)}</b><small>${escapeHtml(server.allocation)}</small></div><div class="infra-resource"><div><span>Memory</span><b>${Number(server.memoryUsed).toFixed(1)} / ${Number(server.memoryLimit).toFixed(1)} GB</b></div>${infraMeter(server.memoryUsed, server.memoryLimit, "violet")}</div><div class="infra-resource"><div><span>Disk</span><b>${Number(server.diskUsed).toFixed(1)} / ${Number(server.diskLimit).toFixed(1)} GB</b></div>${infraMeter(server.diskUsed, server.diskLimit, "accent")}</div><div class="infra-server-image"><span>Docker image</span><code>${escapeHtml(server.image)}</code></div>${actions}</div><div class="infra-server-foot"><span>Uptime ${escapeHtml(server.uptime)}</span><span>${escapeHtml(server.lastAction)}</span></div></article>`; }).join("") : '<div class="infra-empty">No server records yet. Add one to begin.</div>';
+      }
+      async function loadInfrastructure({ silent = false } = {}) { try { const response = await apiFetch("/api/infrastructure"); const result = await response.json(); if (!response.ok || !result.success) throw new Error(result.message || "Infrastructure unavailable"); infrastructureState = result.infrastructure || infrastructureState; infrastructureLoaded = true; renderInfrastructure(); } catch (error) { if (!silent) showToast(error.message || "Unable to load infrastructure", "error"); } }
+      async function syncInfrastructure() { const button = document.getElementById("infraSyncBtn"); if (button) button.disabled = true; try { const response = await apiFetch("/api/infrastructure/sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); const result = await response.json(); if (!response.ok || !result.success) throw new Error(result.message || "Sync failed"); infrastructureState = result.infrastructure || infrastructureState; renderInfrastructure(); showToast("Control plane synced.", "success"); } catch (error) { showToast(error.message || "Unable to sync control plane", "error"); } finally { if (button) button.disabled = false; } }
+      async function infrastructurePowerAction(serverId, signal) { const server = (infrastructureState.servers || []).find((candidate) => candidate.id === serverId); if (!server) return; if (signal === "stop" && !window.confirm(`Stop ${server.name}?`)) return; try { const response = await apiFetch(`/api/infrastructure/servers/${encodeURIComponent(serverId)}/power`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ signal }) }); const result = await response.json(); if (!response.ok || !result.success) throw new Error(result.message || "Power action failed"); infrastructureState = result.infrastructure || infrastructureState; renderInfrastructure(); showToast(`${server.name}: ${signal} signal sent.`, "success"); } catch (error) { showToast(error.message || "Unable to send power action", "error"); } }
+      function toggleInfrastructureCreateForm(force) { const form = document.getElementById("infraCreateForm"); if (!form) return; form.classList.toggle("visible", typeof force === "boolean" ? force : !form.classList.contains("visible")); }
+      async function createInfrastructureServer() { const name = document.getElementById("infraNewName")?.value.trim(); if (!name) { showToast("Enter a server name first.", "error"); return; } const payload = { name, game: document.getElementById("infraNewGame")?.value.trim(), nodeId: document.getElementById("infraNewNode")?.value, memoryLimit: document.getElementById("infraNewMemory")?.value, diskLimit: document.getElementById("infraNewDisk")?.value, allocation: document.getElementById("infraNewAllocation")?.value.trim() }; try { const response = await apiFetch("/api/infrastructure/servers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); const result = await response.json(); if (!response.ok || !result.success) throw new Error(result.message || "Unable to create server"); infrastructureState = result.infrastructure || infrastructureState; renderInfrastructure(); toggleInfrastructureCreateForm(false); ["infraNewName", "infraNewGame", "infraNewAllocation"].forEach((id) => { const element = document.getElementById(id); if (element) element.value = ""; }); showToast("Server record created.", "success"); } catch (error) { showToast(error.message || "Unable to create server", "error"); } }
 
       async function loadGeneralSettings() {
         if (!currentUser) return;
@@ -5485,6 +5530,7 @@
           const data = await res.json();
           if (data.success) {
             currentUser = data.user;
+            applyInfrastructurePermissions();
             // Sidebar profile
             document.getElementById("sidebarProfileName").textContent =
               escapeHtml(currentUser.username);

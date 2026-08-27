@@ -53,3 +53,15 @@ The repository includes `vercel.json` and an exportable Express entry point for 
 
 Vercel Functions use a writable temporary runtime directory for JSON state and uploads. That filesystem is ephemeral, so users, sessions, General/Bars/Music settings, and uploaded media are not durable across cold starts. Use a persistent Node host for the complete stateful panel, or add external database and object storage integrations before using Vercel for production data.
 
+
+
+## Pterodactyl, Wings, and Docker dashboard
+
+The authenticated **Pterodactyl** view provides a control-plane dashboard for Wings node health, Docker runtime versions, server resource usage, allocations, activity, and administrator power actions. It ships with safe demo data for immediate UI review. Optional `PTERODACTYL_PANEL_URL` and `PTERODACTYL_API_KEY` variables reserve the live integration surface; credentials remain server-side.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/infrastructure` | Read nodes, servers, Docker metadata, resources, and activity. |
+| `POST /api/infrastructure/sync` | Record an administrator control-plane sync event. |
+| `POST /api/infrastructure/servers` | Create a server record on a Wings node. |
+| `POST /api/infrastructure/servers/:id/power` | Send start, stop, restart, or kill state transitions. |
