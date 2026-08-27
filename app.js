@@ -334,7 +334,7 @@ function saveMusic(music) {
 
 const DEFAULT_GENERAL = {
   panelName: "BT PANEL",
-  panelSubtitle: "Control center",
+  panelSubtitle: "",
   welcomeTitle: "Welcome",
   welcomeMessage: "Manage your panel from one place.",
 };

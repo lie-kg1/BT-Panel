@@ -3345,7 +3345,7 @@
           <div class="card">
             <div class="card-toolbar">
               <span class="card-title" id="homeWelcomeTitle">Welcome</span>
-              <span class="card-toolbar-subtitle" id="homePanelSubtitle">Control center</span>
+              <span class="card-toolbar-subtitle" id="homePanelSubtitle"></span>
             </div>
             <div class="card-body" style="min-height: auto">
               <p
@@ -3413,7 +3413,6 @@
                 <h2>Settings Management</h2>
                 <p>Configure your panel, appearance, integrations, and runtime defaults.</p>
               </div>
-              <span class="role-badge">Administrator</span>
             </div>
             <div class="settings-tabs" role="tablist" aria-label="Settings categories">
               <button class="settings-tab" id="settings-tab-general" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-general" onclick="switchSettingsTab('general')">General</button>
@@ -3721,7 +3720,6 @@
                 <h2>General Settings</h2>
                 <p>Set the panel identity and the message shown on the home dashboard.</p>
               </div>
-              <span class="role-badge">Administrator</span>
             </div>
             <div class="card-body">
               <div class="general-settings-grid">
@@ -3733,7 +3731,7 @@
                   </div>
                   <div class="form-group">
                     <label class="form-label" for="generalPanelSubtitle">Panel subtitle</label>
-                    <input class="input" id="generalPanelSubtitle" type="text" maxlength="120" placeholder="Control center" oninput="updateGeneralText('panelSubtitle', this.value)" />
+                    <input class="input" id="generalPanelSubtitle" type="text" maxlength="120" placeholder="" oninput="updateGeneralText('panelSubtitle', this.value)" />
                     <div class="form-hint">Short context shown beside the Welcome heading.</div>
                   </div>
                 </div>
@@ -3847,7 +3845,6 @@
                 <h2>Bars Settings</h2>
                 <p>Choose which dashboard indicators and account details are visible on Home.</p>
               </div>
-              <span class="role-badge">Administrator</span>
             </div>
             <div class="card-body">
               <div class="bars-settings-grid">
@@ -4277,7 +4274,7 @@
       }
       function displayRole(role) {
         const r = (role || "member").toLowerCase();
-        return r === "member" ? "MEMBER" : r === "owner" ? "ADMINISTRATOR" : "ADMINISTRATOR";
+        return r === "member" ? "MEMBER" : "";
       }
 
       function roleBadge(role) {
@@ -4446,7 +4443,7 @@
       let musicSettings = { enabled: false, autoplay: false, loop: true, volume: 0.35, selectedTrackId: "", tracks: [] };
       let musicVolumeBeforeMute = null;
       let generalSettingsLoaded = false;
-      let generalSettings = { panelName: "BT PANEL", panelSubtitle: "Control center", welcomeTitle: "Welcome", welcomeMessage: "Manage your panel from one place." };
+      let generalSettings = { panelName: "BT PANEL", panelSubtitle: "", welcomeTitle: "Welcome", welcomeMessage: "Manage your panel from one place." };
       let barsSettingsLoaded = false;
       let barsSettings = { showAdminStats: true, showVersion: true, showRole: true, showHeaderUser: true };
 
@@ -4503,7 +4500,7 @@
 
       function applyGeneralSettings() {
         const name = generalSettings.panelName || "BT PANEL";
-        const subtitle = generalSettings.panelSubtitle || "Control center";
+        const subtitle = generalSettings.panelSubtitle || "";
         const title = generalSettings.welcomeTitle || "Welcome";
         const message = generalSettings.welcomeMessage || "Manage your panel from one place.";
         const brand = document.getElementById("panelBrandName");
@@ -4546,7 +4543,7 @@
       }
 
       function resetGeneralSettings() {
-        generalSettings = { panelName: "BT PANEL", panelSubtitle: "Control center", welcomeTitle: "Welcome", welcomeMessage: "Manage your panel from one place." };
+        generalSettings = { panelName: "BT PANEL", panelSubtitle: "", welcomeTitle: "Welcome", welcomeMessage: "Manage your panel from one place." };
         applyGeneralSettings();
         showToast("General settings reset. Click Save General to persist.", "success");
       }

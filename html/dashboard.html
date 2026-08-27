@@ -2873,7 +2873,6 @@
                 <h2>Settings Management</h2>
                 <p>Configure your panel, appearance, integrations, and runtime defaults.</p>
               </div>
-              <span class="role-badge">Administrator</span>
             </div>
             <div class="settings-tabs" role="tablist" aria-label="Settings categories">
               <button class="settings-tab" id="settings-tab-general" type="button" role="tab" aria-selected="false" aria-controls="settings-panel-general" onclick="switchSettingsTab('general')">General</button>
@@ -3573,7 +3572,7 @@
       }
       function displayRole(role) {
         const r = (role || "member").toLowerCase();
-        return r === "member" ? "MEMBER" : r === "owner" ? "ADMINISTRATOR" : "ADMINISTRATOR";
+        return r === "member" ? "MEMBER" : "";
       }
 
       function roleBadge(role) {
