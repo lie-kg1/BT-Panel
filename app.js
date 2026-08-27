@@ -476,7 +476,13 @@ app.get("/home", (req, res) => {
   if (!currentUser(req)) return res.redirect("/login");
   res.redirect("/");
 });
-app.get(["/team", "/settings", "/users", "/account"], (req, res) => {
+app.get("/settings", (req, res) => {
+  const user = currentUser(req);
+  if (!user) return res.redirect("/login");
+  if (!user || !["owner", "admin"].includes(user.role)) return res.redirect("/music");
+  res.render("admin/dashboard");
+});
+app.get(["/team", "/users", "/account", "/music"], (req, res) => {
   if (!currentUser(req)) return res.redirect("/login");
   res.render("admin/dashboard");
 });

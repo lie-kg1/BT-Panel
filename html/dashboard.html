@@ -2578,6 +2578,15 @@
             <span class="nav-label">Team</span>
           </button>
 
+          <a class="nav-item" id="nav-music" href="/music" aria-label="Music Dashboard">
+            <svg width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 18V5l10-2v13" fill="none"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="16" cy="16" r="3"></circle>
+            </svg>
+            <span class="nav-label">Music Dashboard</span>
+          </a>
+
           <div class="nav-section-label admin-only admin-section-heading" style="display: none">
             <span>Admin Management</span>
             <span class="admin-section-badge">ADMIN</span>
@@ -3637,6 +3646,7 @@
         settings: "Admin Settings",
         users: "User Accounts",
         account: "My Profile",
+        music: "Music Dashboard",
       };
       const VIEW_PATHS = {
         home: "/",
@@ -3644,6 +3654,7 @@
         settings: "/settings",
         users: "/users",
         account: "/account",
+        music: "/music",
       };
 
       function viewFromPathname() {
@@ -3684,7 +3695,8 @@
         });
 
         // Show target view
-        const viewEl = document.getElementById(`view-${viewName}`);
+        const targetViewName = viewName === "music" ? "settings" : viewName;
+        const viewEl = document.getElementById(`view-${targetViewName}`);
         if (viewEl) viewEl.classList.add("active");
         // Reapply the in-memory theme when navigating between dashboard views.
         // This prevents the saved wallpaper from disappearing while Admin Settings opens.
@@ -3708,6 +3720,7 @@
         if (viewName === "users") fetchUsers();
         if (viewName === "team") fetchTeam();
         if (viewName === "settings") switchSettingsTab("appearance");
+        if (viewName === "music") switchSettingsTab("music");
       }
 
       const SETTINGS_TABS = ["appearance", "wallpapers", "general", "music", "bars"];

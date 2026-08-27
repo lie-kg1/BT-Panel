@@ -18,6 +18,8 @@ const authTemplatePaths = [
 const requiredSnippets = [
   'aria-label="${user.online ? "Online" : "Offline"}"></span>',
   'id="nav-settings"',
+  'id="nav-music"',
+  'Music Dashboard',
   'd="M12.22 2h-.44a2 2 0 0 0-2 2v.18',
   'function renderTeamList()',
   'function renderUsersList()',
@@ -179,6 +181,8 @@ for (const emailAuthSnippet of [
 for (const musicSnippet of [
   'const MUSIC_FILE = path.join(DATA_DIR, "music.json")',
   'app.get("/api/music", authRequired',
+  'app.get("/settings", (req, res) => {',
+  'app.get(["/team", "/users", "/account", "/music"]',
   'app.post("/api/music/track", adminRequired',
   'app.post("/api/music/upload", adminRequired',
   'app.delete("/api/music/:id", adminRequired',
