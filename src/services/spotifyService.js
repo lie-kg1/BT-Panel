@@ -72,7 +72,8 @@ async function requestToken(form) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.access_token) {
-    throw spotifyError(data.error_description || data.error || "Spotify token request failed.", response.status || 502);
+    const message = data.error_description || (typeof data.error === "string" ? data.error : data.error?.message) || `Spotify token request failed (${response.status || 502}).`;
+    throw spotifyError(message, response.status || 502);
   }
   return data;
 }
@@ -130,7 +131,7 @@ async function apiRequest(accessToken, endpoint, options = {}) {
   if (response.status === 204) return null;
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const message = data?.error?.message || data?.error_description || "Spotify API request failed.";
+    const message = (typeof data?.error === "string" ? data.error : data?.error?.message) || data?.error_description || `Spotify API request failed (${response.status || 502}).`;
     throw spotifyError(message, response.status || 502);
   }
   return data;
