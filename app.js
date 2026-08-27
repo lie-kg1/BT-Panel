@@ -225,7 +225,6 @@ function sanitizeWallpaperUrl(value) {
   if (typeof value !== "string") return "";
   const candidate = value.trim().slice(0, 500);
   if (candidate.startsWith("/media/")) return candidate;
-  if (candidate.startsWith("/wallpapers/")) return candidate;
   if (candidate.startsWith("/Background/")) return `/media/${candidate.slice("/Background/".length)}`;
   try {
     const parsed = new URL(candidate);

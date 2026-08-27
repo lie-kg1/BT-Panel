@@ -138,7 +138,6 @@ for (const relativePath of [
   "views/auth/register.ejs",
   "public/css/panel.css",
   "public/js/panel.js",
-  "public/wallpapers",
   "html/dashboard.html",
   "html/login.html",
   "html/register.html",
@@ -176,9 +175,6 @@ for (const emailAuthSnippet of [
   if (!serverSource.includes(emailAuthSnippet)) {
     throw new Error(`Email authentication validation is incomplete: ${emailAuthSnippet}`);
   }
-}
-if (!serverSource.includes('candidate.startsWith("/wallpapers/")')) {
-  throw new Error("Local wallpaper URLs cannot be persisted by Save Theme");
 }
 for (const musicSnippet of [
   'const MUSIC_FILE = path.join(DATA_DIR, "music.json")',

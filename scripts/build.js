@@ -14,7 +14,6 @@ const copyTargets = [
   [path.join("public", "css"), path.join("public", "css")],
   [path.join("public", "js"), path.join("public", "js")],
   [path.join("public", "vendor"), path.join("public", "vendor")],
-  [path.join("public", "wallpapers"), path.join("public", "wallpapers")],
   [path.join("public", "gemini-svg.svg"), path.join("public", "gemini-svg.svg")],
   [path.join("public", "default-avatar.svg"), path.join("public", "default-avatar.svg")],
 ];
