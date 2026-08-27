@@ -135,12 +135,6 @@ Vercel Functions use a writable temporary runtime directory for JSON state and u
 
 The project includes the supplied dashboard markup under `views/admin/dashboard.ejs`, the panel stylesheet at `public/css/panel.css`, the browser helper at `public/js/panel.js`, and the root-compatible Express implementation at `app.js` exposed through `src/server.js`.
 
-## Visual references and branding assets
-
-The submitted General Settings screenshot is retained at `docs/reference/settings-general-reference.png` as a visual reference for the dark glassmorphism Settings layout. The supplied purple mark is available at `public/assets/bt-panel-logo-mark.png` and is used by the dashboard as both the sidebar logo and the browser favicon. The original narrow PNG strip is retained at `public/assets/bt-panel-logo.png` for reference.
-
-![General Settings reference](docs/reference/settings-general-reference.png)
-
 ## Organized project layout
 
 The project now includes a conventional Express layout alongside the backwards-compatible root entry point:
