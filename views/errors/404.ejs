@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Page not found · BT Panel</title>
     <link rel="icon" type="image/svg+xml" href="/gemini-svg.svg" />
-    <link rel="alternate icon" type="image/png" href="/assets/bt-panel-logo-mark.png" />
     <style>
       :root {
         color-scheme: dark;
@@ -43,7 +42,7 @@
       }
 
       .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; color: #fff; font-weight: 800; letter-spacing: 0.08em; }
-      .brand img { width: 32px; height: 32px; border-radius: 9px; }
+      .brand-mark-text { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: var(--red); color: #fff; font-size: 12px; letter-spacing: 0; }
       .code { margin: 0; color: var(--red-bright); font: 900 clamp(72px, 16vw, 132px)/0.9 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: -0.08em; text-shadow: 0 0 28px rgba(208, 0, 0, 0.22); }
       h1 { margin: 22px 0 10px; font-size: clamp(22px, 4vw, 32px); }
       p { margin: 0 auto 26px; max-width: 430px; color: var(--muted); line-height: 1.65; }
@@ -57,7 +56,7 @@
   </head>
   <body>
     <main class="not-found" aria-labelledby="not-found-title">
-      <div class="brand"><img src="/assets/bt-panel-logo-mark.png" alt="" /> <span>BT PANEL</span></div>
+      <div class="brand"><span class="brand-mark-text" aria-hidden="true">BT</span> <span>BT PANEL</span></div>
       <p class="code" aria-hidden="true">404</p>
       <h1 id="not-found-title">Page not found</h1>
       <p>The page you requested does not exist or may have moved. Return to the BT Panel home page to continue.</p>
