@@ -25,10 +25,6 @@ Administrators can open **Settings → Music** to manage ambient audio for the p
 
 The studio provides a track library, selected-track playback, enable/disable control, autoplay, loop, volume, deletion, and a save action. Browser autoplay policies may require the administrator to click Play once before a track can start. Music preferences and track metadata are stored in `data/music.json`; only administrators can access the related API routes.
 
-The optional Spotify panel searches the Spotify catalog and provides **Play**, **Queue**, and **Open** actions. Spotify tracks are not copied into the direct-audio library. Playback uses Spotify’s official Web Playback SDK, requires the administrator to connect a Spotify account, and requires a full Spotify Premium subscription. Spotify Developer policies also apply; the integration is intended for personal, non-commercial use and does not download or proxy Spotify audio.
-
-To enable Spotify, create an app in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), select the Web Playback SDK, and register the exact callback URL `/api/spotify/callback` on the BT Panel host. Copy the values from `.env.example` into `.env` and set `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REDIRECT_URI`, and optionally `SPOTIFY_MARKET`. Restart BT Panel, open **Settings → Music**, and connect Spotify before using Play or Queue.
-
 The API surface is:
 
 | Endpoint | Purpose |
@@ -38,22 +34,6 @@ The API surface is:
 | `POST /api/music/track` | Add a direct HTTP(S) audio URL. |
 | `POST /api/music/upload` | Upload a local audio file up to 50 MB. |
 | `DELETE /api/music/:id` | Remove a track and delete its local uploaded file when applicable. |
-
-Spotify routes are administrator-only and require server-side Spotify configuration:
-
-| Endpoint | Purpose |
-| --- | --- |
-| `GET /api/spotify/status` | Read Spotify configuration and connection status. |
-| `GET /api/spotify/connect` | Start Spotify OAuth authorization. |
-| `GET /api/spotify/callback` | Complete Spotify OAuth authorization. |
-| `POST /api/spotify/disconnect` | Remove the current session’s Spotify connection. |
-| `GET /api/spotify/search?q=...` | Search Spotify tracks using catalog metadata. |
-| `GET /api/spotify/token` | Refresh and return a short-lived user playback token to the dashboard. |
-| `POST /api/spotify/play` | Play a Spotify track URI on the BT Panel player device. |
-| `POST /api/spotify/queue` | Add a Spotify track URI to the user’s Spotify queue. |
-| `POST /api/spotify/control` | Pause, resume, skip, or go to the previous Spotify track. |
-| `POST /api/spotify/seek` | Seek the current Spotify track. |
-| `POST /api/spotify/volume` | Set Spotify player volume. |
 
 The owner script uses `admin` and `admin@gmail.com` as convenience defaults for the owner username and email when no overrides are supplied, but it does not ship with a default password. For production or non-interactive setup, set `OWNER_USERNAME`, `OWNER_PASSWORD`, and `OWNER_EMAIL` environment variables. If `OWNER_PASSWORD` is omitted in an interactive terminal, the script prompts for it without echoing the password and asks for confirmation.
 

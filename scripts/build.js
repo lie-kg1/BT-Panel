@@ -9,7 +9,6 @@ fs.mkdirSync(buildDir, { recursive: true });
 
 const copyTargets = [
   [path.join("src", "services", "wallpaperService.js"), path.join("src", "services", "wallpaperService.js")],
-  [path.join("src", "services", "spotifyService.js"), path.join("src", "services", "spotifyService.js")],
   ["html", "html"],
   ["views", "views"],
   [path.join("public", "css"), path.join("public", "css")],
@@ -51,7 +50,6 @@ const requiredOutputs = htmlFiles.map((file) => path.join("html", file)).concat(
   "public/js/panel.js",
   "public/vendor/xterm.min.js",
   path.join("src", "services", "wallpaperService.js"),
-  path.join("src", "services", "spotifyService.js"),
 ]);
 for (const output of requiredOutputs) {
   if (!fs.existsSync(path.join(buildDir, output))) {

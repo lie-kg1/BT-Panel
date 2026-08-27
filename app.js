@@ -8,7 +8,6 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { CATEGORIES, getWallpapers } = require("./src/services/wallpaperService");
-const spotifyService = require("./src/services/spotifyService");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -700,131 +699,6 @@ app.delete("/api/music/:id", adminRequired, (req, res) => {
   const tracks = current.tracks.filter((candidate) => candidate.id !== track.id);
   const music = saveMusic({ ...current, tracks, selectedTrackId: current.selectedTrackId === track.id ? tracks[0]?.id || "" : current.selectedTrackId });
   res.json({ success: true, music });
-});
-
-function spotifyRouteError(res, error) {
-  const status = Number(error?.status) >= 400 && Number(error?.status) < 600 ? Number(error.status) : 502;
-  res.status(status).json({ success: false, message: error?.message || "Spotify service unavailable." });
-}
-
-app.get("/api/spotify/status", adminRequired, (req, res) => {
-  const config = spotifyService.getConfig();
-  res.json({
-    success: true,
-    configured: spotifyService.isConfigured(),
-    oauthConfigured: spotifyService.isOAuthConfigured(),
-    connected: spotifyService.hasUserSession(req.session),
-    market: config.market,
-    user: req.session.spotify?.user || null,
-  });
-});
-
-app.get("/api/spotify/connect", adminRequired, (req, res) => {
-  try {
-    const state = crypto.randomBytes(24).toString("hex");
-    req.session.spotifyOAuthState = state;
-    res.redirect(spotifyService.buildAuthorizeUrl(state));
-  } catch (error) {
-    res.status(error.status || 503).send(error.message || "Spotify OAuth is unavailable.");
-  }
-});
-
-app.get("/api/spotify/callback", adminRequired, async (req, res) => {
-  const expectedState = String(req.session.spotifyOAuthState || "");
-  const receivedState = String(req.query.state || "");
-  delete req.session.spotifyOAuthState;
-  if (!expectedState || !receivedState || expectedState !== receivedState) {
-    return res.redirect("/settings?tab=music&spotify=state-error");
-  }
-  if (req.query.error) return res.redirect("/settings?tab=music&spotify=denied");
-  try {
-    const token = await spotifyService.exchangeAuthorizationCode(String(req.query.code || ""));
-    const user = await spotifyService.getCurrentUser(token.access_token);
-    req.session.spotify = {
-      accessToken: token.access_token,
-      refreshToken: token.refresh_token,
-      expiresAt: Date.now() + Number(token.expires_in || 3600) * 1000,
-      user,
-    };
-    res.redirect("/settings?tab=music&spotify=connected");
-  } catch (error) {
-    console.error("Spotify OAuth callback failed:", error.message);
-    res.redirect("/settings?tab=music&spotify=error");
-  }
-});
-
-app.post("/api/spotify/disconnect", adminRequired, (req, res) => {
-  delete req.session.spotify;
-  delete req.session.spotifyOAuthState;
-  res.json({ success: true });
-});
-
-app.get("/api/spotify/search", adminRequired, async (req, res) => {
-  const query = String(req.query.q || "").trim().slice(0, 120);
-  if (query.length < 2) return res.status(400).json({ success: false, message: "Enter at least two characters to search Spotify." });
-  try {
-    const accessToken = spotifyService.hasUserSession(req.session)
-      ? await spotifyService.getUserAccessToken(req.session)
-      : await spotifyService.getClientAccessToken();
-    const tracks = await spotifyService.searchTracks(query, accessToken);
-    res.json({ success: true, tracks, connected: spotifyService.hasUserSession(req.session) });
-  } catch (error) {
-    spotifyRouteError(res, error);
-  }
-});
-
-app.get("/api/spotify/token", adminRequired, async (req, res) => {
-  try {
-    const accessToken = await spotifyService.getUserAccessToken(req.session);
-    res.json({ success: true, accessToken });
-  } catch (error) {
-    spotifyRouteError(res, error);
-  }
-});
-
-app.post("/api/spotify/play", adminRequired, async (req, res) => {
-  try {
-    await spotifyService.playTrack(req.session, req.body.uri, req.body.deviceId);
-    res.json({ success: true });
-  } catch (error) {
-    spotifyRouteError(res, error);
-  }
-});
-
-app.post("/api/spotify/queue", adminRequired, async (req, res) => {
-  try {
-    await spotifyService.queueTrack(req.session, req.body.uri, req.body.deviceId);
-    res.json({ success: true });
-  } catch (error) {
-    spotifyRouteError(res, error);
-  }
-});
-
-app.post("/api/spotify/control", adminRequired, async (req, res) => {
-  try {
-    await spotifyService.controlPlayer(req.session, req.body.action, req.body.deviceId);
-    res.json({ success: true });
-  } catch (error) {
-    spotifyRouteError(res, error);
-  }
-});
-
-app.post("/api/spotify/seek", adminRequired, async (req, res) => {
-  try {
-    await spotifyService.seekPlayer(req.session, req.body.positionMs, req.body.deviceId);
-    res.json({ success: true });
-  } catch (error) {
-    spotifyRouteError(res, error);
-  }
-});
-
-app.post("/api/spotify/volume", adminRequired, async (req, res) => {
-  try {
-    await spotifyService.setPlayerVolume(req.session, req.body.volumePercent, req.body.deviceId);
-    res.json({ success: true });
-  } catch (error) {
-    spotifyRouteError(res, error);
-  }
 });
 
 app.get("/api/media/list", adminRequired, (_req, res) => res.json({ success: true, files: listMedia() }));

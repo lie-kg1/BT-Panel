@@ -199,18 +199,6 @@ const forbiddenMusicGlyphs = [0x266b, 0x25b6, 0x1f50a, 0x1f507, 0x275a].map((cod
 if (forbiddenMusicGlyphs.some((glyph) => source.includes(glyph))) {
   throw new Error("Music controls must use inline SVG icons instead of emoji or text glyphs");
 }
-for (const spotifySnippet of [
-  'app.get("/api/spotify/status", adminRequired',
-  'app.get("/api/spotify/search", adminRequired',
-  'app.post("/api/spotify/play", adminRequired',
-  'app.post("/api/spotify/queue", adminRequired',
-  'id="spotifySearchInput"',
-  'function loadSpotifyStatus()',
-]) {
-  if (!serverSource.includes(spotifySnippet) && !source.includes(spotifySnippet)) {
-    throw new Error(`Spotify search or playback integration is incomplete: ${spotifySnippet}`);
-  }
-}
 for (const playbackSnippet of [
   'function startMusicPlayback()',
   'musicSettings.enabled && shouldPlay',
