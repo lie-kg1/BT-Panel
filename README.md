@@ -1,6 +1,38 @@
 # BT Panel
 
-A self-contained Express dashboard with login, registration, session authentication, theme persistence, team management, user administration, background media uploads, profile pictures, and password changes.
+A self-contained Express dashboard with login, registration, session authentication, theme persistence, team management, user administration, background media uploads, profile pictures, password changes, and role-aware Music controls.
+
+## Install and run
+
+Clone the repository and enter the project directory before running any BT Panel command:
+
+```bash
+git clone https://github.com/lie-kg1/BT-Panel.git
+cd BT-Panel
+npm install
+cp .env.example .env
+npm start
+```
+
+Then open <http://localhost:3000/>. The `/` route serves the dashboard for authenticated users; signed-out visitors are redirected to `/login`. New accounts can be created at `/register`.
+
+The interactive menu can be launched locally from the project directory:
+
+```bash
+bash menu.sh
+```
+
+If the repository has not been cloned yet, the remote menu can be launched with:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/lie-kg1/BT-Panel/main/menu.sh)"
+```
+
+Run these as separate commands. Do not append a menu option, `git clone`, `cd`, or `README` text to the installer command. Wait for the menu to appear, then enter the requested option. If the launcher reports `BASH_SOURCE[0]: unbound variable`, pull the latest `menu.sh` and run it with `bash menu.sh` from the repository directory.
+
+## Latest release
+
+The latest packaged release is [BT Panel v2.1.1](https://github.com/lie-kg1/BT-Panel/releases/tag/v2.1.1). Download the source archive directly from [BT-Panel-v2.1.1.zip](https://github.com/lie-kg1/BT-Panel/releases/download/v2.1.1/BT-Panel-v2.1.1.zip).
 
 ## General, Music, and Bars settings
 
@@ -21,23 +53,21 @@ The General and Bars API surface is:
 
 ### Music settings
 
-Administrators can open **Settings → Music** to manage ambient audio for the panel. The Music studio supports direct HTTP(S) audio URLs and local uploads for common formats such as MP3, WAV, OGG, OPUS, AAC, FLAC, M4A, and WEBM. Uploaded files are stored in `media/music/` and are excluded from source control by the repository ignore rules.
+Authenticated users can open **Music** to use the playback controls. Administrators can manage ambient audio for the panel through the track library, including direct HTTP(S) audio URLs and local uploads for common formats such as MP3, WAV, OGG, OPUS, AAC, FLAC, M4A, and WEBM. Uploaded files are stored in `media/music/` and are excluded from source control by the repository ignore rules.
 
-The studio provides a track library, selected-track playback, enable/disable control, autoplay, loop, volume, deletion, and a save action. Browser autoplay policies may require the administrator to click Play once before a track can start. Music preferences and track metadata are stored in `data/music.json`; only administrators can access the related API routes.
+The Music view provides selected-track playback, enable/disable control, autoplay, loop, volume, and local preference reset for Members. Administrators additionally have track upload, URL add, deletion, and saved-preference controls. Browser autoplay policies may require the user to click Play once before a track can start. Music preferences and track metadata are stored in `data/music.json`; authenticated users can read playback settings, while mutation endpoints remain administrator-only.
 
 The API surface is:
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /api/music` | Read the current administrator music settings and track library. |
-| `POST /api/music` | Save playback preferences and the selected track. |
-| `POST /api/music/track` | Add a direct HTTP(S) audio URL. |
-| `POST /api/music/upload` | Upload a local audio file up to 50 MB. |
-| `DELETE /api/music/:id` | Remove a track and delete its local uploaded file when applicable. |
+| `GET /api/music` | Read the current authenticated-user music settings and track library. |
+| `POST /api/music` | Administrator-only save for playback preferences and the selected track. |
+| `POST /api/music/track` | Administrator-only add for a direct HTTP(S) audio URL. |
+| `POST /api/music/upload` | Administrator-only upload for a local audio file up to 50 MB. |
+| `DELETE /api/music/:id` | Administrator-only removal of a track and its local uploaded file when applicable. |
 
 The owner script uses `admin` and `admin@gmail.com` as convenience defaults for the owner username and email when no overrides are supplied, but it does not ship with a default password. For production or non-interactive setup, set `OWNER_USERNAME`, `OWNER_PASSWORD`, and `OWNER_EMAIL` environment variables. If `OWNER_PASSWORD` is omitted in an interactive terminal, the script prompts for it without echoing the password and asks for confirmation.
-
-Open <http://localhost:3000/>. The `/` route serves the dashboard for authenticated users and redirects signed-out visitors to `/login`. New accounts can be created at `/register`.
 
 ### Troubleshooting menu launch
 
