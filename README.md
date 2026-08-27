@@ -35,6 +35,29 @@ The API surface is:
 | `POST /api/music/upload` | Upload a local audio file up to 50 MB. |
 | `DELETE /api/music/:id` | Remove a track and delete its local uploaded file when applicable. |
 
+### Game server management
+
+Administrators can open **Game Servers** from the dashboard to manage Java and Docker-backed servers without replacing the existing BT Panel experience. The Jtg-inspired module supports server creation, Java type/version metadata, start/stop/restart, status and resource summaries, console commands, safe file browsing and editing, uploads, ZIP backups, Modrinth plugin/mod installation, suspension, deletion, and local or remote node metadata.
+
+The module is intentionally optional. If Docker is unavailable, the panel remains usable in a safe demo mode and does not attempt privileged container operations. A real Linux host with Docker and persistent storage is required for actual game-server containers. The module uses BT Panel authentication and JSON runtime storage; server data is written under the configured runtime directory and should not be placed on an ephemeral production filesystem.
+
+The main API surface is:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /servers` | Open the authenticated Game Servers page. |
+| `GET /api/servers/overview` | Read visible servers, nodes, Docker state, and Java-server count. |
+| `POST /api/servers` | Administrator-only create a Java or Docker server. |
+| `POST /api/servers/:id/start`, `/stop`, `/restart` | Start, stop, or restart a server. |
+| `GET /api/servers/:id/stats` | Read status and resource metrics. |
+| `POST /api/servers/:id/command` | Send a console command. |
+| `/api/servers/:id/files/*` | Browse, read, write, upload, rename, remove, download, and extract files. |
+| `/api/servers/:id/backups` | Create, list, download, and remove ZIP backups. |
+| `POST /api/servers/:id/:kind/install-modrinth` | Install a Modrinth plugin or mod by project ID. |
+| `GET/POST/DELETE /api/nodes` | Administrator-only node inventory management. |
+
+The port does not claim to provide Jtg’s incomplete SFTP implementation or Playit tunnel workflow. Those systems require separate host services and were kept out of the safe BT Panel core.
+
 The owner script uses `admin` and `admin@gmail.com` as convenience defaults for the owner username and email when no overrides are supplied, but it does not ship with a default password. For production or non-interactive setup, set `OWNER_USERNAME`, `OWNER_PASSWORD`, and `OWNER_EMAIL` environment variables. If `OWNER_PASSWORD` is omitted in an interactive terminal, the script prompts for it without echoing the password and asks for confirmation.
 
 Open <http://localhost:3000/>. The `/` route serves the dashboard for authenticated users and redirects signed-out visitors to `/login`. New accounts can be created at `/register`.

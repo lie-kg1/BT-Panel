@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { CATEGORIES, getWallpapers } = require("./src/services/wallpaperService");
+const serverManager = require("./src/services/serverManager");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -450,6 +451,11 @@ const musicUpload = multer({
   },
 });
 
+const serverUpload = multer({
+  dest: path.join(DATA_DIR, "temp"),
+  limits: { fileSize: 200 * 1024 * 1024 },
+});
+
 const profileUpload = multer({
   dest: PROFILE_DIR,
   limits: { fileSize: 2 * 1024 * 1024 },
@@ -480,6 +486,10 @@ app.get("/home", (req, res) => {
 app.get(["/team", "/settings", "/users", "/account"], (req, res) => {
   if (!currentUser(req)) return res.redirect("/login");
   res.render("admin/dashboard");
+});
+app.get(["/servers", "/servers/"], (req, res) => {
+  if (!currentUser(req)) return res.redirect("/login");
+  res.render("admin/servers");
 });
 app.get("/login", (_req, res) => res.render("auth/login", { initialTheme: loadTheme() }));
 app.get("/register", (_req, res) => res.render("auth/register", { initialTheme: loadTheme() }));
@@ -699,6 +709,139 @@ app.delete("/api/music/:id", adminRequired, (req, res) => {
   const tracks = current.tracks.filter((candidate) => candidate.id !== track.id);
   const music = saveMusic({ ...current, tracks, selectedTrackId: current.selectedTrackId === track.id ? tracks[0]?.id || "" : current.selectedTrackId });
   res.json({ success: true, music });
+});
+
+function serverManagerError(res, error, fallback) {
+  return res.status(error.status || 500).json({ success: false, message: error.message || fallback });
+}
+
+app.get("/api/nodes", adminRequired, async (req, res) => {
+  try { res.json({ success: true, nodes: await serverManager.listNodes(req.user) }); }
+  catch (error) { serverManagerError(res, error, "Unable to load nodes."); }
+});
+app.post("/api/nodes", adminRequired, async (req, res) => {
+  try { res.status(201).json({ success: true, node: await serverManager.createNode(req.user, req.body) }); }
+  catch (error) { serverManagerError(res, error, "Unable to create node."); }
+});
+app.delete("/api/nodes/:id", adminRequired, async (req, res) => {
+  try { await serverManager.deleteNode(req.user, req.params.id); res.json({ success: true }); }
+  catch (error) { serverManagerError(res, error, "Unable to delete node."); }
+});
+
+app.get("/api/servers", authRequired, async (req, res) => {
+  try { res.json({ success: true, servers: await serverManager.listServers(req.user) }); }
+  catch (error) { serverManagerError(res, error, "Unable to load servers."); }
+});
+app.get("/api/servers/overview", authRequired, async (req, res) => {
+  try { res.json({ success: true, overview: await serverManager.getOverview(req.user) }); }
+  catch (error) { serverManagerError(res, error, "Unable to load server overview."); }
+});
+app.post("/api/servers", adminRequired, async (req, res) => {
+  try { res.status(201).json({ success: true, server: await serverManager.createServer(req.user, req.body) }); }
+  catch (error) { serverManagerError(res, error, "Unable to create server."); }
+});
+app.get("/api/servers/:id", authRequired, async (req, res) => {
+  try { res.json({ success: true, server: await serverManager.getServer(req.user, req.params.id) }); }
+  catch (error) { serverManagerError(res, error, "Unable to load server."); }
+});
+app.put("/api/servers/:id", authRequired, async (req, res) => {
+  try { res.json({ success: true, server: await serverManager.updateServer(req.user, req.params.id, req.body) }); }
+  catch (error) { serverManagerError(res, error, "Unable to update server."); }
+});
+app.delete("/api/servers/:id", adminRequired, async (req, res) => {
+  try { await serverManager.deleteServer(req.user, req.params.id); res.json({ success: true }); }
+  catch (error) { serverManagerError(res, error, "Unable to delete server."); }
+});
+for (const action of ["start", "stop", "restart"]) {
+  app.post(`/api/servers/:id/${action}`, authRequired, async (req, res) => {
+    try { res.json({ success: true, server: await serverManager.powerServer(req.user, req.params.id, action) }); }
+    catch (error) { serverManagerError(res, error, `Unable to ${action} server.`); }
+  });
+}
+app.get("/api/servers/:id/stats", authRequired, async (req, res) => {
+  try { res.json({ success: true, stats: await serverManager.getStats(req.user, req.params.id) }); }
+  catch (error) { serverManagerError(res, error, "Unable to load server stats."); }
+});
+app.post("/api/servers/:id/command", authRequired, async (req, res) => {
+  try { await serverManager.sendCommand(req.user, req.params.id, req.body.command); res.json({ success: true }); }
+  catch (error) { serverManagerError(res, error, "Unable to send command."); }
+});
+app.put("/api/servers/:id/suspend", adminRequired, async (req, res) => {
+  try { res.json({ success: true, server: await serverManager.setSuspended(req.user, req.params.id, req.body.suspended, req.body.duration) }); }
+  catch (error) { serverManagerError(res, error, "Unable to update suspension."); }
+});
+
+app.get("/api/servers/:id/files", authRequired, async (req, res) => {
+  try { res.json({ success: true, files: await serverManager.listFiles(req.user, req.params.id, req.query.path || "/") }); }
+  catch (error) { serverManagerError(res, error, "Unable to list server files."); }
+});
+app.get("/api/servers/:id/files/read", authRequired, async (req, res) => {
+  try { res.json({ success: true, file: await serverManager.readFile(req.user, req.params.id, req.query.path || "/") }); }
+  catch (error) { serverManagerError(res, error, "Unable to read server file."); }
+});
+app.put("/api/servers/:id/files/write", authRequired, async (req, res) => {
+  try { await serverManager.writeFile(req.user, req.params.id, req.body.path, req.body.content); res.json({ success: true }); }
+  catch (error) { serverManagerError(res, error, "Unable to save server file."); }
+});
+app.post("/api/servers/:id/files/entry", authRequired, async (req, res) => {
+  try { await serverManager.createEntry(req.user, req.params.id, req.body.path, req.body.directory); res.json({ success: true }); }
+  catch (error) { serverManagerError(res, error, "Unable to create file entry."); }
+});
+app.post("/api/servers/:id/files/rename", authRequired, async (req, res) => {
+  try { await serverManager.renameEntry(req.user, req.params.id, req.body.oldPath, req.body.newPath); res.json({ success: true }); }
+  catch (error) { serverManagerError(res, error, "Unable to rename file entry."); }
+});
+app.delete("/api/servers/:id/files", authRequired, async (req, res) => {
+  try {
+    const paths = Array.isArray(req.body.paths) ? req.body.paths : [req.body.path];
+    for (const relativePath of paths.filter(Boolean)) await serverManager.removeEntry(req.user, req.params.id, relativePath);
+    res.json({ success: true });
+  } catch (error) { serverManagerError(res, error, "Unable to remove file entry."); }
+});
+app.post("/api/servers/:id/files/upload", authRequired, (req, res) => {
+  serverUpload.single("file")(req, res, async (uploadError) => {
+    if (uploadError) return res.status(400).json({ success: false, message: uploadError.message });
+    try { await serverManager.uploadFile(req.user, req.params.id, req.body.path || "/", req.file); res.json({ success: true }); }
+    catch (error) { serverManagerError(res, error, "Unable to upload server file."); }
+  });
+});
+app.get("/api/servers/:id/files/download", authRequired, async (req, res) => {
+  try {
+    const filePath = serverManager.resolveFilePath(req.user, req.params.id, req.query.path || "/");
+    res.download(filePath, path.basename(filePath));
+  } catch (error) { serverManagerError(res, error, "Unable to download server file."); }
+});
+app.post("/api/servers/:id/files/extract", authRequired, async (req, res) => {
+  try { await serverManager.extractArchive(req.user, req.params.id, req.body.path); res.json({ success: true }); }
+  catch (error) { serverManagerError(res, error, "Unable to extract archive."); }
+});
+
+app.get("/api/servers/:id/backups", authRequired, async (req, res) => {
+  try { res.json({ success: true, backups: await serverManager.listBackups(req.user, req.params.id) }); }
+  catch (error) { serverManagerError(res, error, "Unable to list backups."); }
+});
+app.post("/api/servers/:id/backups", authRequired, async (req, res) => {
+  try { res.json({ success: true, backup: await serverManager.createBackup(req.user, req.params.id) }); }
+  catch (error) { serverManagerError(res, error, "Unable to create backup."); }
+});
+app.delete("/api/servers/:id/backups/:filename", authRequired, async (req, res) => {
+  try { await serverManager.removeBackup(req.user, req.params.id, req.params.filename); res.json({ success: true }); }
+  catch (error) { serverManagerError(res, error, "Unable to delete backup."); }
+});
+app.get("/api/servers/:id/backups/:filename/download", authRequired, async (req, res) => {
+  try {
+    const filename = path.basename(req.params.filename);
+    if (!filename.endsWith(".zip")) throw Object.assign(new Error("Invalid backup filename."), { status: 400 });
+    const backupPath = path.join(serverManager.BACKUPS_DIR, req.params.id, filename);
+    res.download(backupPath, filename);
+  } catch (error) { serverManagerError(res, error, "Unable to download backup."); }
+});
+
+app.post("/api/servers/:id/:kind/install-modrinth", authRequired, async (req, res) => {
+  try {
+    if (!["mod", "plugin"].includes(req.params.kind)) throw Object.assign(new Error("Unsupported install type."), { status: 400 });
+    res.json({ success: true, result: await serverManager.installModrinth(req.user, req.params.id, req.params.kind, req.body.projectId) });
+  } catch (error) { serverManagerError(res, error, "Unable to install Modrinth package."); }
 });
 
 app.get("/api/media/list", adminRequired, (_req, res) => res.json({ success: true, files: listMedia() }));

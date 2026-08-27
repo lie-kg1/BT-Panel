@@ -6,6 +6,8 @@ const stylesPath = path.join(__dirname, "..", "public", "css", "panel.css");
 const source = fs.readFileSync(dashboardPath, "utf8");
 const styles = fs.readFileSync(stylesPath, "utf8");
 const serverSource = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+const serversViewSource = fs.readFileSync(path.join(__dirname, "..", "views", "admin", "servers.ejs"), "utf8");
+const serverManagerSource = fs.readFileSync(path.join(__dirname, "..", "src", "services", "serverManager.js"), "utf8");
 const root = path.join(__dirname, "..");
 const loginSource = fs.readFileSync(path.join(root, "views", "auth", "login.ejs"), "utf8");
 const authTemplatePaths = [
@@ -136,6 +138,7 @@ if (styles.includes("/* Card-free authentication pages */")) {
 }
 for (const relativePath of [
   "views/admin/dashboard.ejs",
+  "views/admin/servers.ejs",
   "views/auth/login.ejs",
   "views/auth/register.ejs",
   "public/css/panel.css",
@@ -184,6 +187,45 @@ for (const emailAuthSnippet of [
 if (!serverSource.includes('candidate.startsWith("/wallpapers/")')) {
   throw new Error("Local wallpaper URLs cannot be persisted by Save Theme");
 }
+for (const serverSnippet of [
+  'app.get(["/servers", "/servers/"], (req, res) =>',
+  'app.get("/api/servers/overview", authRequired',
+  'app.post("/api/servers", adminRequired',
+  'app.post(`/api/servers/:id/${action}`, authRequired',
+  'app.get("/api/servers/:id/files", authRequired',
+  'app.post("/api/servers/:id/backups", authRequired',
+  'const serverManager = require("./src/services/serverManager")',
+]) {
+  if (!serverSource.includes(serverSnippet)) {
+    throw new Error(`Jtg-style server route support is incomplete: ${serverSnippet}`);
+  }
+}
+for (const managerSnippet of [
+  "function createContainer(server)",
+  "async function createBackup(user, id)",
+  "async function listFiles(user, id, relativePath)",
+  "async function installModrinth(user, id, kind, projectId)",
+  "async function getStats(user, id)",
+]) {
+  if (!serverManagerSource.includes(managerSnippet)) {
+    throw new Error(`Server manager feature is incomplete: ${managerSnippet}`);
+  }
+}
+for (const serverViewSnippet of [
+  'id="serverList"',
+  'id="nodeList"',
+  'data-tab="console"',
+  'data-tab="files"',
+  'data-tab="backups"',
+  'data-tab="packages"',
+  'id="createServerForm"',
+  'id="serverFileInput"',
+]) {
+  if (!serversViewSource.includes(serverViewSnippet)) {
+    throw new Error(`Servers view feature is incomplete: ${serverViewSnippet}`);
+  }
+}
+
 for (const musicSnippet of [
   'const MUSIC_FILE = path.join(DATA_DIR, "music.json")',
   'app.get("/api/music", adminRequired',
