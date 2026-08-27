@@ -1,0 +1,14 @@
+{
+  "wallpaperUrl": "/media/1787781521527-af8767fe.jpg",
+  "bgBlur": 0,
+  "bgOpacity": 100,
+  "accentColor": "#d00000",
+  "glassTint": "#000000",
+  "navText": "#ffffff",
+  "navTextActive": "#ffffff",
+  "glassBlur": 0,
+  "glassSaturate": 180,
+  "borderRadius": 24,
+  "glassOpacity": 1,
+  "showTeam": true
+}
