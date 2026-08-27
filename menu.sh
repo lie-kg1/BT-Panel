@@ -11,6 +11,26 @@ else
 fi
 cd "$ROOT_DIR"
 
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  RED=$'\033[0;31m'
+  GREEN=$'\033[0;32m'
+  YELLOW=$'\033[0;33m'
+  BLUE=$'\033[0;34m'
+  CYAN=$'\033[0;36m'
+  RESET=$'\033[0m'
+else
+  RED=""
+  GREEN=""
+  YELLOW=""
+  BLUE=""
+  CYAN=""
+  RESET=""
+fi
+
+info() { printf '%b%s%b\n' "$CYAN" "$*" "$RESET"; }
+success() { printf '%b%s%b\n' "$GREEN" "$*" "$RESET"; }
+error() { printf '%b%s%b\n' "$RED" "$*" "$RESET" >&2; }
+
 usage() {
   cat <<'USAGE'
 Usage: ./menu.sh
@@ -32,35 +52,36 @@ if [[ $# -gt 0 ]]; then
 fi
 
 pause() {
-  read -r -p "Press Enter to continue..." _ || true
+  read -r -p "${CYAN}Press Enter to continue...${RESET}" _ || true
 }
 
 require_project() {
   if [[ ! -f "$ROOT_DIR/package.json" || ! -f "$ROOT_DIR/install.sh" ]]; then
-    printf 'Error: BT Panel project files were not found in %s.\n' "$ROOT_DIR" >&2
-    printf 'Clone the repository, cd into its directory, and run menu.sh again.\n' >&2
+    error "Error: BT Panel project files were not found in $ROOT_DIR."
+    info "Clone the repository, cd into its directory, and run menu.sh again."
     return 1
   fi
 }
 
 show_menu() {
-  printf '\n%s\n' '========================================'
-  printf '%s\n' '              BT PANEL MENU'
-  printf '%s\n' '========================================'
-  printf '%s\n' '1) Install or update dependencies'
-  printf '%s\n' '2) Create or update owner account'
-  printf '%s\n' '3) Build project'
-  printf '%s\n' '4) Run project checks'
-  printf '%s\n' '5) Start production server'
-  printf '%s\n' '6) Start development server'
-  printf '%s\n' '7) Exit'
-  printf '%s\n' '========================================'
+  printf '\n%b%s%b\n' "$BLUE" '========================================' "$RESET"
+  printf '%b%s%b\n' "$GREEN" '              BT PANEL MENU' "$RESET"
+  printf '%b%s%b\n' "$BLUE" '========================================' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '1) Install or update dependencies' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '2) Create or update owner account' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '3) Build project' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '4) Run project checks' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '5) Start production server' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '6) Start development server' "$RESET"
+  printf '%b%s%b\n' "$YELLOW" '7) Exit' "$RESET"
+  printf '%b%s%b\n' "$BLUE" '========================================' "$RESET"
 }
 
 while true; do
   show_menu
-  read -r -p "Choose an option [1-7]: " choice || {
-    printf '\nExiting.\n'
+  read -r -p "${CYAN}Choose an option [1-7]: ${RESET}" choice || {
+    printf '\n'
+    info 'Exiting.'
     exit 0
   }
 
@@ -94,11 +115,11 @@ while true; do
       exec npm run dev
       ;;
     7)
-      printf '%s\n' 'Goodbye.'
+      success 'Goodbye.'
       exit 0
       ;;
     *)
-      printf 'Invalid option: %s\n' "$choice" >&2
+      error "Invalid option: $choice"
       ;;
   esac
 done

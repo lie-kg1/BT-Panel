@@ -4,6 +4,26 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MIN_NODE_MAJOR="${MIN_NODE_MAJOR:-20}"
 
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  RED=$'\033[0;31m'
+  GREEN=$'\033[0;32m'
+  YELLOW=$'\033[0;33m'
+  BLUE=$'\033[0;34m'
+  CYAN=$'\033[0;36m'
+  RESET=$'\033[0m'
+else
+  RED=""
+  GREEN=""
+  YELLOW=""
+  BLUE=""
+  CYAN=""
+  RESET=""
+fi
+
+info() { printf '%b%s%b\n' "$CYAN" "$*" "$RESET"; }
+success() { printf '%b%s%b\n' "$GREEN" "$*" "$RESET"; }
+warn() { printf '%b%s%b\n' "$YELLOW" "$*" "$RESET" >&2; }
+
 cd "$ROOT_DIR"
 
 usage() {
@@ -18,7 +38,7 @@ USAGE
 }
 
 fail() {
-  echo "Error: $*" >&2
+  printf '%bError: %s%b\\n' "$RED" "$*" "$RESET" >&2
   exit 1
 }
 
@@ -47,7 +67,7 @@ install_nodejs_debian() {
   command -v dpkg >/dev/null 2>&1 || fail "dpkg is required for the Debian/Ubuntu Node.js installer."
   command -v curl >/dev/null 2>&1 || run_root apt-get update -y && run_root apt-get install -y curl ca-certificates gnupg
 
-  echo "Installing Node.js ${MIN_NODE_MAJOR}.x from the NodeSource Debian repository..."
+  info "Installing Node.js ${MIN_NODE_MAJOR}.x from the NodeSource Debian repository..."
   run_root apt-get update -y
   run_root apt-get install -y ca-certificates curl gnupg
   run_root install -d -m 0755 /etc/apt/keyrings
@@ -68,24 +88,24 @@ install_nodejs_debian() {
 
 ensure_nodejs() {
   if node_is_ready; then
-    echo "Node.js $(node --version) and npm $(npm --version) are available."
+    success "Node.js $(node --version) and npm $(npm --version) are available."
     return
   fi
 
   if command -v node >/dev/null 2>&1; then
-    echo "Node.js $(node --version) is too old; Node.js ${MIN_NODE_MAJOR}+ is required."
+    warn "Node.js $(node --version) is too old; Node.js ${MIN_NODE_MAJOR}+ is required."
   else
-    echo "Node.js is not installed; Node.js ${MIN_NODE_MAJOR}+ is required."
+    warn "Node.js is not installed; Node.js ${MIN_NODE_MAJOR}+ is required."
   fi
 
   install_nodejs_debian
   node_is_ready || fail "Node.js ${MIN_NODE_MAJOR}+ and npm were not available after installation."
-  echo "Installed Node.js $(node --version) and npm $(npm --version)."
+  success "Installed Node.js $(node --version) and npm $(npm --version)."
 }
 
 verify_runtime() {
   node_is_ready || fail "Node.js ${MIN_NODE_MAJOR}+ and npm are required."
-  echo "Runtime check passed: Node.js $(node --version), npm $(npm --version)."
+  success "Runtime check passed: Node.js $(node --version), npm $(npm --version)."
 }
 
 case "${1:-}" in
@@ -122,14 +142,9 @@ if [[ ! -f "$ROOT_DIR/data/users.json" ]]; then
   chmod 600 "$ROOT_DIR/data/users.json"
 fi
 
-cat <<'NOTICE'
-
-BT Panel installation completed.
-
-Next steps:
-  1. Run ./owner.sh to create or update the owner account.
-  2. Run ./menu.sh for the interactive launcher, or run npm start directly.
-  3. Open http://127.0.0.1:3000/
-
-Set a strong SESSION_SECRET in .env before using the panel outside local development.
-NOTICE
+printf '\\n%bBT Panel installation completed.%b\\n\\n' "$GREEN" "$RESET"
+printf '%bNext steps:%b\\n' "$BLUE" "$RESET"
+printf '  %b1.%b Run ./owner.sh to create or update the owner account.\\n' "$CYAN" "$RESET"
+printf '  %b2.%b Run ./menu.sh for the interactive launcher, or run npm start directly.\\n' "$CYAN" "$RESET"
+printf '  %b3.%b Open http://127.0.0.1:3000/\\n' "$CYAN" "$RESET"
+printf '\\n%bSet a strong SESSION_SECRET in .env before using the panel outside local development.%b\\n' "$YELLOW" "$RESET"

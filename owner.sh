@@ -4,6 +4,26 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 USERS_FILE="${OWNER_USERS_FILE:-$ROOT_DIR/data/users.json}"
 
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  RED=$'\033[0;31m'
+  GREEN=$'\033[0;32m'
+  YELLOW=$'\033[0;33m'
+  BLUE=$'\033[0;34m'
+  CYAN=$'\033[0;36m'
+  RESET=$'\033[0m'
+else
+  RED=""
+  GREEN=""
+  YELLOW=""
+  BLUE=""
+  CYAN=""
+  RESET=""
+fi
+
+info() { printf '%b%s%b\n' "$CYAN" "$*" "$RESET"; }
+success() { printf '%b%s%b\n' "$GREEN" "$*" "$RESET"; }
+error() { printf '%b%s%b\n' "$RED" "$*" "$RESET" >&2; }
+
 usage() {
   cat <<'USAGE'
 Usage: ./owner.sh
@@ -37,52 +57,52 @@ if command -v node >/dev/null 2>&1; then
 fi
 
 if [[ "$runtime_ready" != true ]]; then
-  echo "Node.js 20+ or project dependencies are missing; running ./install.sh..."
+  info "Node.js 20+ or project dependencies are missing; running ./install.sh..."
   bash "$ROOT_DIR/install.sh"
 fi
 
 node_major="$(node -p 'Number(process.versions.node.split(".")[0])')"
 if (( node_major < 20 )); then
-  echo "Error: Node.js 20 or newer is required; found $(node --version)." >&2
+  error "Error: Node.js 20 or newer is required; found $(node --version)."
   exit 1
 fi
 
 if [[ ! -d "$ROOT_DIR/node_modules/bcryptjs" ]]; then
-  echo "Error: dependencies are not installed after running install.sh." >&2
+  error "Error: dependencies are not installed after running install.sh."
   exit 1
 fi
 
 username="${OWNER_USERNAME:-admin}"
 if [[ -z "${OWNER_USERNAME+x}" && -t 0 ]]; then
-  read -r -p "Owner username [admin]: " entered_username
+  read -r -p "${CYAN}Owner username [admin]: ${RESET}" entered_username
   username="${entered_username:-$username}"
 fi
 
 password="${OWNER_PASSWORD:-}"
 if [[ -z "$password" && -t 0 ]]; then
-  read -r -s -p "Owner password (minimum 8 characters): " password
+  read -r -s -p "${CYAN}Owner password (minimum 8 characters): ${RESET}" password
   printf '\n'
-  read -r -s -p "Confirm owner password: " password_confirmation
+  read -r -s -p "${CYAN}Confirm owner password: ${RESET}" password_confirmation
   printf '\n'
   [[ "$password" == "$password_confirmation" ]] || {
-    echo "Error: passwords do not match." >&2
+    error "Error: passwords do not match."
     exit 1
   }
 fi
 
 email="${OWNER_EMAIL:-admin@gmail.com}"
 if [[ -z "${OWNER_EMAIL+x}" && -t 0 ]]; then
-  read -r -p "Owner email [admin@gmail.com]: " entered_email
+  read -r -p "${CYAN}Owner email [admin@gmail.com]: ${RESET}" entered_email
   email="${entered_email:-$email}"
 fi
 
 if [[ ! "$username" =~ ^[A-Za-z0-9._-]{3,32}$ ]]; then
-  echo "Error: username must be 3–32 characters using letters, numbers, dots, dashes, or underscores." >&2
+  error "Error: username must be 3–32 characters using letters, numbers, dots, dashes, or underscores."
   exit 1
 fi
 
 if [[ ${#password} -lt 8 ]]; then
-  echo "Error: password must be at least 8 characters. Set OWNER_PASSWORD or enter it interactively." >&2
+  error "Error: password must be at least 8 characters. Set OWNER_PASSWORD or enter it interactively."
   exit 1
 fi
 
@@ -106,7 +126,7 @@ if (fs.existsSync(usersFile)) {
   try {
     data = JSON.parse(fs.readFileSync(usersFile, "utf8"));
   } catch (error) {
-    console.error(`Error: could not parse ${usersFile}: ${error.message}`);
+    console.error(`\x1b[31mError: could not parse ${usersFile}: ${error.message}\x1b[0m`);
     process.exit(1);
   }
 }
@@ -144,5 +164,5 @@ fs.mkdirSync(path.dirname(usersFile), { recursive: true });
 fs.writeFileSync(tempFile, `${JSON.stringify({ __version__: 2, users: data.users }, null, 2)}\n`, { mode: 0o600 });
 fs.chmodSync(tempFile, 0o600);
 fs.renameSync(tempFile, usersFile);
-console.log(`Owner account ${existing ? "updated" : "created"}: ${username}`);
+console.log(`\x1b[32mOwner account ${existing ? "updated" : "created"}: ${username}\x1b[0m`);
 NODE
