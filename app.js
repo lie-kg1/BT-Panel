@@ -30,7 +30,6 @@ const THEME_FILE = path.join(DATA_DIR, "theme.json");
 const MUSIC_FILE = path.join(DATA_DIR, "music.json");
 const GENERAL_FILE = path.join(DATA_DIR, "general.json");
 const BARS_FILE = path.join(DATA_DIR, "bars.json");
-const INFRA_FILE = path.join(DATA_DIR, "infrastructure.json");
 const MUSIC_DIR = path.join(MEDIA_DIR, "music");
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "botpanel.sid";
 const SESSION_SECRET = process.env.SESSION_SECRET || "change-this-session-secret";
@@ -392,63 +391,6 @@ function saveBars(bars) {
   return saved;
 }
 
-
-const DEFAULT_INFRASTRUCTURE = {
-  mode: "demo",
-  panelUrl: "",
-  lastSync: Date.now(),
-  nodes: [
-    { id: "node-eu-01", name: "wings-eu-01", location: "Frankfurt, DE", status: "online", wings: "1.11.10", docker: "27.5.1", uptime: "42d 08h", cpu: 34, memoryUsed: 48, memoryTotal: 128, diskUsed: 412, diskTotal: 1000, address: "10.0.1.21" },
-    { id: "node-us-01", name: "wings-us-01", location: "Ashburn, US", status: "online", wings: "1.11.10", docker: "27.5.1", uptime: "18d 19h", cpu: 22, memoryUsed: 31, memoryTotal: 64, diskUsed: 188, diskTotal: 500, address: "10.0.2.18" },
-    { id: "node-sg-01", name: "wings-sg-01", location: "Singapore, SG", status: "maintenance", wings: "1.11.9", docker: "27.4.0", uptime: "—", cpu: 0, memoryUsed: 0, memoryTotal: 64, diskUsed: 0, diskTotal: 500, address: "10.0.3.14" },
-  ],
-  servers: [
-    { id: "srv-smp", name: "Survival SMP", identifier: "smp-7fc2", nodeId: "node-eu-01", game: "Minecraft", status: "running", memoryUsed: 3.1, memoryLimit: 6, diskUsed: 18.4, diskLimit: 50, uptime: "6d 14h", image: "ghcr.io/pterodactyl/yolks:java_21", allocation: "10.0.1.21:25565", lastAction: "Healthy" },
-    { id: "srv-web", name: "Web Production", identifier: "web-31aa", nodeId: "node-us-01", game: "Node.js", status: "stopped", memoryUsed: 0.4, memoryLimit: 2, diskUsed: 4.8, diskLimit: 20, uptime: "—", image: "ghcr.io/pterodactyl/yolks:nodejs_22", allocation: "10.0.2.18:3000", lastAction: "Stopped by operator" },
-    { id: "srv-valheim", name: "Valheim Community", identifier: "vh-92d1", nodeId: "node-eu-01", game: "Valheim", status: "running", memoryUsed: 5.8, memoryLimit: 8, diskUsed: 26.2, diskLimit: 80, uptime: "2d 03h", image: "ghcr.io/pterodactyl/yolks:steamcmd", allocation: "10.0.1.21:2456", lastAction: "Healthy" },
-  ],
-  activity: [
-    { id: "event-1", text: "Wings heartbeat received from wings-eu-01", tone: "success", ts: Date.now() - 240000 },
-    { id: "event-2", text: "Docker image cache refreshed on wings-us-01", tone: "info", ts: Date.now() - 1080000 },
-    { id: "event-3", text: "wings-sg-01 entered maintenance mode", tone: "warning", ts: Date.now() - 2820000 },
-  ],
-};
-
-function infraString(value, fallback, max = 120) {
-  const result = String(value ?? "").replace(/[<>]/g, "").trim().slice(0, max);
-  return result || fallback;
-}
-
-function infraId(value, fallback) {
-  const result = String(value || "").trim().slice(0, 80);
-  return /^[a-zA-Z0-9_.-]+$/.test(result) ? result : fallback;
-}
-
-function infraStatus(value, fallback) {
-  const status = String(value || "").toLowerCase();
-  return ["online", "offline", "maintenance", "running", "stopped"].includes(status) ? status : fallback;
-}
-
-function sanitizeInfrastructure(input) {
-  const source = input || {};
-  const nodes = (Array.isArray(source.nodes) ? source.nodes : DEFAULT_INFRASTRUCTURE.nodes).slice(0, 50).map((node, index) => ({
-    id: infraId(node.id, `node-${index + 1}`), name: infraString(node.name, `wings-${index + 1}`, 64), location: infraString(node.location, "Unassigned", 80), status: infraStatus(node.status, "offline"),
-    wings: infraString(node.wings, "—", 32), docker: infraString(node.docker, "—", 32), uptime: infraString(node.uptime, "—", 32), cpu: clampInt(node.cpu, 0, 100, 0),
-    memoryUsed: clampInt(node.memoryUsed, 0, 100000, 0), memoryTotal: clampInt(node.memoryTotal, 1, 100000, 1), diskUsed: clampInt(node.diskUsed, 0, 1000000, 0), diskTotal: clampInt(node.diskTotal, 1, 1000000, 1), address: infraString(node.address, "—", 64),
-  }));
-  const nodeIds = new Set(nodes.map((node) => node.id));
-  const servers = (Array.isArray(source.servers) ? source.servers : DEFAULT_INFRASTRUCTURE.servers).slice(0, 200).map((server, index) => ({
-    id: infraId(server.id, `server-${index + 1}`), name: infraString(server.name, `Server ${index + 1}`, 80), identifier: infraId(server.identifier, `srv-${index + 1}`), nodeId: nodeIds.has(server.nodeId) ? server.nodeId : nodes[0]?.id || "", game: infraString(server.game, "Generic", 48), status: infraStatus(server.status, "stopped"),
-    memoryUsed: Math.max(0, Number(server.memoryUsed) || 0), memoryLimit: Math.max(0.1, Number(server.memoryLimit) || 1), diskUsed: Math.max(0, Number(server.diskUsed) || 0), diskLimit: Math.max(0.1, Number(server.diskLimit) || 1), uptime: infraString(server.uptime, "—", 32), image: infraString(server.image, "—", 160), allocation: infraString(server.allocation, "—", 80), lastAction: infraString(server.lastAction, "No recent action", 80),
-  }));
-  const activity = (Array.isArray(source.activity) ? source.activity : DEFAULT_INFRASTRUCTURE.activity).slice(0, 12).map((event, index) => ({ id: infraId(event.id, `event-${index + 1}`), text: infraString(event.text, "Infrastructure event", 180), tone: ["success", "info", "warning", "danger"].includes(event.tone) ? event.tone : "info", ts: Number(event.ts) || Date.now() }));
-  return { mode: process.env.PTERODACTYL_PANEL_URL ? "configured" : "demo", panelUrl: sanitizeWallpaperUrl(process.env.PTERODACTYL_PANEL_URL || source.panelUrl || ""), lastSync: Number(source.lastSync) || Date.now(), nodes, servers, activity };
-}
-
-function loadInfrastructure() { return sanitizeInfrastructure(readJson(INFRA_FILE, DEFAULT_INFRASTRUCTURE)); }
-function saveInfrastructure(value) { const saved = sanitizeInfrastructure(value); writeJson(INFRA_FILE, saved); return saved; }
-function infraEvent(value, text, tone = "info") { value.activity = [{ id: crypto.randomUUID(), text, tone, ts: Date.now() }, ...(value.activity || [])].slice(0, 12); }
-
 function authRequired(req, res, next) {
   const user = currentUser(req);
   if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
@@ -535,7 +477,7 @@ app.get("/home", (req, res) => {
   if (!currentUser(req)) return res.redirect("/login");
   res.redirect("/");
 });
-app.get(["/team", "/settings", "/users", "/account", "/pterodactyl"], (req, res) => {
+app.get(["/team", "/settings", "/users", "/account"], (req, res) => {
   if (!currentUser(req)) return res.redirect("/login");
   res.render("admin/dashboard");
 });
@@ -709,41 +651,6 @@ app.get("/api/bars", authRequired, (_req, res) => {
 app.post("/api/bars", adminRequired, (req, res) => {
   const bars = saveBars(req.body);
   res.json({ success: true, bars });
-});
-
-
-
-app.get("/api/infrastructure", authRequired, (_req, res) => res.json({ success: true, infrastructure: loadInfrastructure() }));
-
-app.post("/api/infrastructure/sync", adminRequired, (_req, res) => {
-  const value = loadInfrastructure();
-  value.lastSync = Date.now();
-  infraEvent(value, "Pterodactyl control plane sync completed", "success");
-  res.json({ success: true, infrastructure: saveInfrastructure(value) });
-});
-
-app.post("/api/infrastructure/servers", adminRequired, (req, res) => {
-  const value = loadInfrastructure();
-  const nodeId = value.nodes.some((node) => node.id === req.body.nodeId) ? req.body.nodeId : value.nodes[0]?.id;
-  if (!nodeId) return res.status(400).json({ success: false, message: "Create a Wings node before adding a server." });
-  const server = { id: `srv-${crypto.randomBytes(4).toString("hex")}`, name: infraString(req.body.name, "New server", 80), identifier: infraId(req.body.identifier, `srv-${crypto.randomBytes(2).toString("hex")}`), nodeId, game: infraString(req.body.game, "Generic", 48), status: "stopped", memoryUsed: 0, memoryLimit: Math.max(0.1, Number(req.body.memoryLimit) || 2), diskUsed: 0, diskLimit: Math.max(0.1, Number(req.body.diskLimit) || 20), uptime: "—", image: infraString(req.body.image, "ghcr.io/pterodactyl/yolks:nodejs_22", 160), allocation: infraString(req.body.allocation, "Pending allocation", 80), lastAction: "Created locally" };
-  value.servers.unshift(server);
-  infraEvent(value, `${server.name} was created on ${nodeId}`, "info");
-  res.status(201).json({ success: true, infrastructure: saveInfrastructure(value) });
-});
-
-app.post("/api/infrastructure/servers/:id/power", adminRequired, (req, res) => {
-  const signal = String(req.body.signal || "").toLowerCase();
-  const nextStatus = { start: "running", restart: "running", stop: "stopped", kill: "stopped" }[signal];
-  if (!nextStatus) return res.status(400).json({ success: false, message: "Unsupported power action." });
-  const value = loadInfrastructure();
-  const server = value.servers.find((candidate) => candidate.id === req.params.id);
-  if (!server) return res.status(404).json({ success: false, message: "Server not found." });
-  server.status = nextStatus;
-  server.uptime = nextStatus === "running" ? "just now" : "—";
-  server.lastAction = `${signal[0].toUpperCase()}${signal.slice(1)} signal sent`;
-  infraEvent(value, `${server.name}: ${signal} signal sent to Docker container`, signal === "kill" ? "danger" : "success");
-  res.json({ success: true, infrastructure: saveInfrastructure(value) });
 });
 
 app.get("/api/music", adminRequired, (_req, res) => {
