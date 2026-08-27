@@ -148,7 +148,6 @@ for (const relativePath of [
   "public/assets/bt-panel-logo.png",
   "public/assets/bt-panel-logo-mark.png",
   "public/gemini-svg.svg",
-  "docs/reference/settings-general-reference.png",
   "views/errors/404.ejs",
   "vercel.json",
 ]) {
