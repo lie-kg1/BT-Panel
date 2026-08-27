@@ -2,7 +2,6 @@
   --wallpaper-url: none;
   --bg-card: rgba(12, 14, 28, 0.45);
   --bg-card-raised: rgba(12, 14, 28, 0.55);
-  --accent-hover: #9a82ff;
   --accent-glow: rgba(124, 92, 255, 0.3);
 }
 
@@ -87,7 +86,7 @@ select {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover, #9a82ff);
+  background: var(--accent, #7c5cff);
 }
 
 .nav-item {
