@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | BT PANEL</title>
+    <link rel="icon" type="image/svg+xml" href="/gemini-svg.svg" />
+    <link rel="alternate icon" type="image/png" href="/assets/bt-panel-logo-mark.png" />
+    <style>
+      :root {
+        --bg-main: #000000;
+        --wallpaper-url: none;
+        --bg-blur: 0px;
+        --bg-opacity: 1;
+        --glass-tint: 0, 0, 0;
+        --bg-sidebar: rgba(var(--glass-tint), 0.55);
+        --bg-card: rgba(0, 0, 0, 0.45);
+        --bg-card-raised: rgba(0, 0, 0, 0.55);
+        --line: rgba(255, 255, 255, 0.1);
+        --line-strong: rgba(255, 255, 255, 0.15);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass-shine: rgba(255, 255, 255, 0.03);
+        --panel-radius: 24px;
+        --glass-blur: 0px;
+        --glass-saturate: 180%;
+        --glass-opacity: 0.22;
+        --auth-input-bg: rgba(0, 0, 0, 0.72);
+        --auth-input-border: rgba(0, 0, 0, 0.35);
+        --accent: #d00000;
+        --accent-hover: #f01818;
+        --accent-glow: rgba(208, 0, 0, 0.34);
+        --accent-cyan: #20d9ff;
+        --text-primary: #e7e9f0;
+        --text-dim: #9da3b4;
+        --text-faint: #ffffff;
+        --nav-text: #9da3b4;
+        --nav-text-active: #e7e9f0;
+        --green: #35e6a1;
+        --amber: #ffc857;
+        --red: #ff5c75;
+        --gray: #596078;
+        --font-ui: "Nunito Sans", system-ui, -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas,
+          monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background-color: var(--bg-main) !important;
+        color: var(--text-primary) !important;
+        font-family: var(--font-ui);
+        font-weight: 700;
+        overflow-x: hidden;
+      }
+
+      .bg-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+        filter: blur(var(--bg-blur));
+        opacity: var(--bg-opacity);
+        transition: filter 0.2s ease, opacity 0.2s ease;
+      }
+
+      .bg-image {
+        width: 100%;
+        height: 100%;
+        background-image: var(--wallpaper-url);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        transition: filter 0.2s ease, opacity 0.2s ease;
+      }
+
+      .bg-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+      }
+
+      button {
+        font-family: inherit;
+      }
+
+      .auth-shell {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 40px 16px;
+      }
+
+      .card {
+        position: relative;
+        z-index: 2;
+        width: 340px;
+        background: var(--bg-card);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--panel-radius);
+        padding: 34px 32px 28px;
+        backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 var(--glass-shine);
+        text-align: center;
+      }
+
+      .brand {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        letter-spacing: 0.2px;
+      }
+
+      .tagline {
+        font-size: 13px;
+        color: var(--text-faint);
+        margin-bottom: 26px;
+      }
+
+      label {
+        display: block;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-dim);
+        margin-bottom: 6px;
+        margin-top: 16px;
+      }
+
+      .field-wrap {
+        position: relative;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="email"] {
+        width: 100%;
+        background: var(--auth-input-bg);
+        border: 1px solid var(--auth-input-border);
+        border-radius: 8px;
+        padding: 11px 12px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px var(--accent-glow);
+      }
+
+      input::placeholder {
+        color: var(--text-faint);
+      }
+
+      .field-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+        color: #7a7a8c;
+        pointer-events: none;
+      }
+
+      .show-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-faint);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .show-toggle:hover {
+        color: var(--text-dim);
+      }
+
+      .btn {
+        width: 100%;
+        border: none;
+        border-radius: 9px;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 22px;
+        color: #fff;
+        transition: filter 0.15s ease, transform 0.1s ease;
+      }
+
+      .btn:hover {
+        filter: brightness(1.08);
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+
+      .btn-login {
+        background: var(--accent);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 16px var(--accent-glow);
+      }
+      .btn-login:hover:not(:disabled) {
+        background: var(--accent-hover);
+        box-shadow: 0 6px 24px var(--accent-glow);
+      }
+
+      .links-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 18px;
+        font-size: 12.5px;
+        font-weight: 700;
+      }
+
+      .links-row a {
+        color: #ffffff;
+        text-decoration: none;
+      }
+      .links-row a:hover {
+        color: #ffffff;
+        text-decoration: underline;
+      }
+      .auth-shell .card {
+        width: min(100%, 340px);
+      }
+
+      .auth-shell label {
+        font-size: 11px;
+        margin-top: 14px;
+        margin-bottom: 5px;
+        letter-spacing: 0.01em;
+      }
+
+      .auth-shell input[type="text"],
+      .auth-shell input[type="password"],
+      .auth-shell input[type="email"] {
+        min-height: 40px;
+        padding: 10px 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .auth-shell .show-toggle {
+        font-size: 11px;
+      }
+
+      .auth-shell .btn {
+        min-height: 44px;
+        margin-top: 18px;
+        font-size: 13px;
+      }
+
+      @media (max-width: 560px) {
+        .auth-shell {
+          padding: 24px 14px;
+        }
+
+        .auth-shell .card {
+          width: 100%;
+          max-width: 340px;
+          padding: 24px 14px 20px;
+          border-radius: 18px;
+        }
+
+        .auth-shell .brand {
+          font-size: 18px;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="/css/panel.css" />
+  </head>
+  <body>
+    <div class="bg-container" id="bgContainer">
+      <div class="bg-image" id="bgImage"></div>
+      <video
+        class="bg-video"
+        id="bgVideo"
+        autoplay
+        loop
+        muted
+        playsinline
+      ></video>
+    </div>
+
+    <div class="auth-shell">
+      <div class="card">
+        <div class="brand">BT PANEL</div>
+        <form id="login-form">
+          <label for="user">Username or Email</label>
+          <div class="field-wrap">
+            <input
+              type="text"
+              id="user"
+              placeholder="Enter username or email"
+              autocomplete="username"
+              required
+              autofocus
+            />
+          </div>
+
+          <label for="pass">Password</label>
+          <div class="field-wrap">
+            <input
+              type="password"
+              id="pass"
+              placeholder="Enter password"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="show-toggle"
+              onclick="const p=document.getElementById('pass'); p.type = p.type==='password' ? 'text' : 'password'; this.textContent = p.type==='password' ? 'Show' : 'Hide';"
+            >
+              Show
+            </button>
+          </div>
+
+          <button type="submit" class="btn btn-login">Login</button>
+          <p
+            id="login-error"
+            style="
+              color: var(--red);
+              font-size: 13px;
+              margin: 12px 0 0;
+              display: none;
+            "
+          ></p>
+        </form>
+
+        <div class="links-row" style="justify-content: center">
+          <a href="/register">Create account</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function setImageBackground(url) {
+        const bgImg = document.getElementById("bgImage");
+        const bgVid = document.getElementById("bgVideo");
+        bgVid.pause();
+        bgVid.style.display = "none";
+        bgImg.style.display = "block";
+        document.documentElement.style.setProperty(
+          "--wallpaper-url",
+          `url('${url}')`
+        );
+      }
+
+      function setVideoBackground(url) {
+        const bgImg = document.getElementById("bgImage");
+        const bgVid = document.getElementById("bgVideo");
+        bgImg.style.display = "none";
+        bgVid.src = url;
+        bgVid.style.display = "block";
+        bgVid.play();
+      }
+
+      function applyThemeValues(settings) {
+        const bgImg = document.getElementById("bgImage");
+        const bgVid = document.getElementById("bgVideo");
+
+        if (settings.wallpaperUrl) {
+          const isVideo = /\.(mp4|webm|mov)$/i.test(settings.wallpaperUrl);
+          if (isVideo) {
+            bgImg.style.display = "none";
+            bgVid.src = settings.wallpaperUrl;
+            bgVid.style.display = "block";
+            bgVid.play().catch(() => {});
+          } else {
+            bgVid.style.display = "none";
+            bgVid.pause();
+            bgVid.src = "";
+            document.documentElement.style.setProperty(
+              "--wallpaper-url",
+              `url('${settings.wallpaperUrl}')`
+            );
+            bgImg.style.display = "block";
+          }
+        } else {
+          bgImg.style.display = "none";
+          bgVid.style.display = "none";
+          bgVid.pause();
+          bgVid.src = "";
+          document.documentElement.style.setProperty("--wallpaper-url", "none");
+        }
+
+        const blur = parseInt(settings.bgBlur ?? 0, 10);
+        document.documentElement.style.setProperty("--bg-blur", blur + "px");
+
+        const opacity = parseInt(settings.bgOpacity ?? 100, 10) / 100;
+        document.documentElement.style.setProperty(
+          "--bg-opacity",
+          String(opacity)
+        );
+
+        const accent = settings.accentColor || "#d00000";
+        document.documentElement.style.setProperty("--accent", accent);
+
+        const glassTint = settings.glassTint || "#000000";
+        const rgb = hexToRgb(glassTint);
+        const glassOpacity = Math.max(0, Math.min(100, parseInt(settings.glassOpacity ?? 22, 10) || 0)) / 100;
+        const glassBlur = Math.max(0, Math.min(40, parseInt(settings.glassBlur ?? 0, 10) || 0));
+        const borderRadius = Math.max(0, Math.min(24, parseInt(settings.borderRadius ?? 24, 10) || 0));
+        const glassSaturate = Math.max(100, Math.min(220, parseInt(settings.glassSaturate ?? 180, 10) || 180));
+        document.documentElement.style.setProperty("--glass-tint", rgb);
+        document.documentElement.style.setProperty("--bg-sidebar", `rgba(${rgb}, ${0.92 * glassOpacity})`);
+        document.documentElement.style.setProperty("--bg-card", `rgba(${rgb}, ${0.45 * glassOpacity})`);
+        document.documentElement.style.setProperty("--bg-card-raised", `rgba(${rgb}, ${0.55 * glassOpacity})`);
+        document.documentElement.style.setProperty("--glass-blur", glassBlur + "px");
+        document.documentElement.style.setProperty("--glass-saturate", glassSaturate + "%");
+        document.documentElement.style.setProperty("--panel-radius", borderRadius + "px");
+        document.documentElement.style.setProperty("--glass-opacity", String(glassOpacity));
+        document.documentElement.style.setProperty("--glass-border", `rgba(255, 255, 255, ${0.32 * glassOpacity})`);
+        document.documentElement.style.setProperty("--glass-shine", `rgba(255, 255, 255, ${0.08 * glassOpacity})`);
+        document.documentElement.style.setProperty("--auth-input-bg", `rgba(${rgb}, ${0.72 * glassOpacity})`);
+        document.documentElement.style.setProperty("--auth-input-border", `rgba(255, 255, 255, ${0.35 * glassOpacity})`);
+
+        if (settings.navText) {
+          document.documentElement.style.setProperty(
+            "--nav-text",
+            settings.navText
+          );
+        }
+        if (settings.navTextActive) {
+          document.documentElement.style.setProperty(
+            "--nav-text-active",
+            settings.navTextActive
+          );
+        }
+      }
+
+      function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result
+          ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(
+              result[3],
+              16
+            )}`
+          : "12, 14, 28";
+      }
+
+      const INITIAL_THEME = <%- JSON.stringify(initialTheme || {}).replace(/</g, "\\u003c") %>;
+
+      function loadSavedTheme() {
+        let data = {};
+        const stored = localStorage.getItem("botpanel_theme");
+        if (stored) {
+          try {
+            data = { ...JSON.parse(stored) };
+          } catch (e) {}
+        }
+        if (INITIAL_THEME && typeof INITIAL_THEME === "object") {
+          data = { ...data, ...INITIAL_THEME };
+        }
+        if (Object.keys(data).length > 0) applyThemeValues(data);
+        fetch("/api/theme")
+          .then((res) => res.json())
+          .then((serverData) => {
+            if (
+              serverData &&
+              (serverData.wallpaperUrl !== undefined ||
+                serverData.accentColor !== undefined)
+            ) {
+              data = { ...data, ...serverData };
+              applyThemeValues(data);
+              localStorage.setItem("botpanel_theme", JSON.stringify(data));
+            }
+          })
+          .catch(() => {});
+      }
+
+      loadSavedTheme();
+
+      const form = document.getElementById("login-form");
+      const errorEl = document.getElementById("login-error");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorEl.style.display = "none";
+        const username = document.getElementById("user").value;
+        const password = document.getElementById("pass").value;
+
+        try {
+          const res = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            window.location.href = "/";
+          } else {
+            errorEl.textContent = data.message || "Sign in failed.";
+            errorEl.style.display = "block";
+          }
+        } catch (err) {
+          errorEl.textContent = "Could not reach the panel server.";
+          errorEl.style.display = "block";
+        }
+      });
+    </script>
+    <script src="/js/panel.js" defer></script>
+  </body>
+</html>
