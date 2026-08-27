@@ -349,159 +349,6 @@
         color: #fff;
       }
 
-      .sidebar-music-widget {
-        margin: 12px 0 0;
-        padding: 10px;
-        border: 1px solid rgba(208, 0, 0, 0.45);
-        border-radius: 12px;
-        background: rgba(5, 7, 18, 0.5);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 22px rgba(0, 0, 0, 0.18);
-      }
-
-      .sidebar.sidebar-collapsed .sidebar-music-widget {
-        display: none !important;
-      }
-
-      .sidebar-music-head,
-      .sidebar-music-progress,
-      .sidebar-music-actions {
-        display: flex;
-        align-items: center;
-      }
-
-      .sidebar-music-head {
-        justify-content: space-between;
-        gap: 8px;
-        color: var(--text-dim);
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .sidebar-music-open {
-        width: 24px;
-        height: 24px;
-        padding: 0;
-        border: 1px solid rgba(137, 148, 176, 0.2);
-        border-radius: 7px;
-        color: var(--text-dim);
-        background: rgba(255, 255, 255, 0.04);
-        cursor: pointer;
-      }
-
-      .sidebar-music-open:hover {
-        color: #fff;
-        border-color: rgba(208, 0, 0, 0.7);
-      }
-
-      .sidebar-music-track {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-width: 0;
-        margin-top: 9px;
-      }
-
-      .sidebar-music-art {
-        display: grid;
-        width: 32px;
-        height: 32px;
-        flex: 0 0 32px;
-        place-items: center;
-        border-radius: 9px;
-        color: #fff;
-        background: linear-gradient(145deg, #d00000, #35101a);
-        box-shadow: 0 0 14px rgba(208, 0, 0, 0.28);
-      }
-
-      .sidebar-music-copy {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        gap: 2px;
-      }
-
-      .sidebar-music-copy strong,
-      .sidebar-music-copy span {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .sidebar-music-copy strong {
-        color: var(--text-primary);
-        font-size: 11px;
-      }
-
-      .sidebar-music-copy span {
-        color: var(--text-dim);
-        font-size: 9px;
-      }
-
-      .sidebar-music-actions {
-        justify-content: center;
-        gap: 6px;
-        margin-top: 9px;
-      }
-
-      .sidebar-music-btn {
-        display: grid;
-        width: 26px;
-        height: 26px;
-        place-items: center;
-        padding: 0;
-        border: 1px solid rgba(137, 148, 176, 0.2);
-        border-radius: 50%;
-        color: var(--text-dim);
-        background: rgba(255, 255, 255, 0.04);
-        cursor: pointer;
-        font-size: 16px;
-        line-height: 1;
-      }
-
-      .sidebar-music-btn:hover:not(:disabled) {
-        color: #fff;
-        border-color: rgba(208, 0, 0, 0.7);
-        background: rgba(208, 0, 0, 0.2);
-      }
-
-      .sidebar-music-btn.primary {
-        width: 32px;
-        height: 32px;
-        color: #fff;
-        background: linear-gradient(145deg, #d00000, #8d0000);
-        border-color: rgba(255, 130, 130, 0.55);
-      }
-
-      .sidebar-music-btn:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-      }
-
-      .sidebar-music-progress {
-        gap: 7px;
-        margin-top: 8px;
-      }
-
-      .sidebar-music-progress input[type="range"] {
-        width: 100%;
-        min-width: 0;
-        height: 3px;
-        accent-color: var(--accent);
-      }
-
-      .sidebar-music-time {
-        display: flex;
-        gap: 2px;
-        min-width: 62px;
-        justify-content: flex-end;
-        color: var(--text-dim);
-        font-family: var(--font-mono);
-        font-size: 9px;
-        white-space: nowrap;
-      }
-
       /* ── Sidebar Profile ── */
       .sidebar-profile {
         margin-top: auto;
@@ -3466,30 +3313,6 @@
             <span class="nav-label">My Account</span>
           </button>
                 </nav>
-        <section class="sidebar-music-widget admin-only" id="sidebarMusicWidget" aria-label="Music player" style="display: none">
-          <div class="sidebar-music-head">
-            <span>Now playing</span>
-            <button class="sidebar-music-open" type="button" onclick="switchView('settings'); switchSettingsTab('music')" aria-label="Open music settings" title="Open music settings">⚙</button>
-          </div>
-          <div class="sidebar-music-track">
-            <div class="sidebar-music-art" aria-hidden="true">
-              <svg class="music-icon-svg" viewBox="0 0 24 24"><path d="M9 18V5l10-2v13" fill="none"></path><circle cx="6" cy="18" r="3"></circle><circle cx="16" cy="16" r="3"></circle></svg>
-            </div>
-            <div class="sidebar-music-copy">
-              <strong id="sidebarMusicTitle">No track selected</strong>
-              <span id="sidebarMusicMeta">Add a track in Music settings</span>
-            </div>
-          </div>
-          <div class="sidebar-music-actions">
-            <button class="sidebar-music-btn" type="button" onclick="skipMusicTrack(-1)" data-music-requires-track aria-label="Previous track" title="Previous track">‹</button>
-            <button class="sidebar-music-btn primary" type="button" onclick="toggleMusicPlayback()" id="sidebarMusicPlayBtn" data-music-requires-track aria-label="Play selected track" title="Play selected track"><svg class="music-icon-svg" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"></path></svg></button>
-            <button class="sidebar-music-btn" type="button" onclick="skipMusicTrack(1)" data-music-requires-track aria-label="Next track" title="Next track">›</button>
-          </div>
-          <div class="sidebar-music-progress">
-            <input id="sidebarMusicSeek" type="range" min="0" max="0" step="0.1" value="0" disabled oninput="seekMusicTrack(this.value)" aria-label="Sidebar track progress" />
-            <div class="sidebar-music-time"><span id="sidebarMusicCurrentTime">0:00</span><span>/</span><span id="sidebarMusicDuration">0:00</span></div>
-          </div>
-        </section>
         <div class="sidebar-profile">
           <div class="profile-card">
             <div class="profile-avatar-small avatar-with-presence" id="sidebarAvatar">
@@ -5027,16 +4850,6 @@
         }
         if (currentTimeLabel) currentTimeLabel.textContent = formatMusicTime(currentTime);
         if (durationLabel) durationLabel.textContent = formatMusicTime(duration);
-        const sidebarSeek = document.getElementById("sidebarMusicSeek");
-        const sidebarCurrentTimeLabel = document.getElementById("sidebarMusicCurrentTime");
-        const sidebarDurationLabel = document.getElementById("sidebarMusicDuration");
-        if (sidebarSeek) {
-          sidebarSeek.max = String(duration);
-          sidebarSeek.value = String(Math.min(currentTime, duration || 0));
-          sidebarSeek.disabled = duration <= 0;
-        }
-        if (sidebarCurrentTimeLabel) sidebarCurrentTimeLabel.textContent = formatMusicTime(currentTime);
-        if (sidebarDurationLabel) sidebarDurationLabel.textContent = formatMusicTime(duration);
         const hasTrack = Boolean(selectedMusicTrack());
         document.querySelectorAll("[data-music-requires-track]").forEach((control) => {
           control.disabled = !hasTrack;
@@ -5050,13 +4863,6 @@
           transportPlayButton.setAttribute("aria-label", playing ? "Pause selected track" : "Play selected track");
           transportPlayButton.title = playing ? "Pause selected track" : "Play selected track";
           transportPlayButton.setAttribute("aria-pressed", String(Boolean(playing)));
-        }
-        const sidebarPlayButton = document.getElementById("sidebarMusicPlayBtn");
-        if (sidebarPlayButton) {
-          sidebarPlayButton.innerHTML = playing ? MUSIC_ICON_PAUSE : MUSIC_ICON_PLAY;
-          sidebarPlayButton.setAttribute("aria-label", playing ? "Pause selected track" : "Play selected track");
-          sidebarPlayButton.title = playing ? "Pause selected track" : "Play selected track";
-          sidebarPlayButton.setAttribute("aria-pressed", String(Boolean(playing)));
         }
         const muteButton = document.getElementById("musicMuteBtn");
         if (muteButton) {
@@ -5081,10 +4887,6 @@
         const trackMeta = track ? `${track.artist || (track.source === "upload" ? "Uploaded audio" : "External URL")} · ${Math.round((Number(musicSettings.volume) || 0) * 100)}% volume` : "Add a track in Music settings";
         if (title) title.textContent = trackTitle;
         if (meta) meta.textContent = trackMeta;
-        const sidebarTitle = document.getElementById("sidebarMusicTitle");
-        const sidebarMeta = document.getElementById("sidebarMusicMeta");
-        if (sidebarTitle) sidebarTitle.textContent = trackTitle;
-        if (sidebarMeta) sidebarMeta.textContent = trackMeta;
       }
 
       function updateMusicStatus() {
