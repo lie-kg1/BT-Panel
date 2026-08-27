@@ -58,7 +58,7 @@ const requiredSnippets = [
   'fetchTeam({ silent: true })',
   'fetchUsers({ silent: true })',
   'document.addEventListener("visibilitychange"',
-  'brand-mark-text',
+  'src="/gemini-svg.svg"',
   'href="/gemini-svg.svg"'
 ];
 
