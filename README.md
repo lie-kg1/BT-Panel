@@ -2,67 +2,6 @@
 
 A self-contained Express dashboard with login, registration, session authentication, theme persistence, team management, user administration, background media uploads, profile pictures, and password changes.
 
-## Run locally
-
-Use the included installer on a Debian or Ubuntu host. It installs or upgrades to Node.js 20+, installs dependencies, creates the runtime directories, and initializes the local users file:
-
-```bash
-./install.sh
-```
-
-To create or update the owner account securely, run:
-
-```bash
-./owner.sh
-```
-
-For an interactive launcher covering installation, owner setup, building, checks, and starting the server, run it from the BT Panel project directory:
-
-```bash
-./menu.sh
-```
-
-If you need to copy the latest launcher from GitHub into an existing checkout:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/lie-kg1/BT-Panel/refs/heads/main/menu.sh -o menu.sh
-chmod +x menu.sh
-bash menu.sh
-```
-
-You may also launch the downloaded script directly from the current directory with:
-
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/lie-kg1/BT-Panel/refs/heads/main/menu.sh)"
-```
-
-The direct command uses the current working directory. Therefore, run it after changing into the cloned BT Panel directory:
-
-```bash
-cd /path/to/BT-Panel
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/lie-kg1/BT-Panel/refs/heads/main/menu.sh)"
-```
-
-The menu options are:
-
-| Option | Action |
-| ---: | --- |
-| `1` | Install or update Node.js, npm dependencies, and runtime directories. |
-| `2` | Create or update the owner account. |
-| `3` | Run `npm run build`. |
-| `4` | Run `npm run check`. |
-| `5` | Start the production server with `npm start`. |
-| `6` | Start the development server with `npm run dev`. |
-| `7` | Exit the menu. |
-
-The launcher validates that `package.json` and `install.sh` are present before options `1` through `6`. If it is run from another directory, change into the BT Panel directory and run it again.
-
-If Node.js and the dependencies are already installed, you can start the server directly:
-
-```bash
-npm start
-```
-
 ## General, Music, and Bars settings
 
 Administrators can open **Settings → General** to configure the panel name, sidebar branding, browser title, welcome heading, welcome message, and the short subtitle beside the Home card heading. Values are sanitized, stored in `data/general.json`, and applied to the dashboard after saving. The General panel also includes a live preview so changes can be reviewed before they are persisted.
