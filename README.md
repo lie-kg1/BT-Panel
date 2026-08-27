@@ -1,4 +1,4 @@
-# Bot Panel
+# BT Panel
 
 A self-contained Express dashboard with login, registration, session authentication, theme persistence, team management, user administration, background media uploads, profile pictures, and password changes.
 
