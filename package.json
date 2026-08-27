@@ -10,7 +10,7 @@
     "build": "node scripts/build.js",
     "createuser": "node scripts/createuser.js",
     "lint": "node scripts/build.js --check",
-    "check": "node --check app.js && node --check src/services/wallpaperService.js && node --check public/js/panel.js && node --check src/app.js && node --check src/server.js && node scripts/validate-dashboard-markup.js && python3 scripts/vpanel-agent.py"
+    "check": "node --check app.js && node --check src/services/wallpaperService.js && node --check src/services/pterodactylService.js && node --check public/js/panel.js && node --check src/app.js && node --check src/server.js && node scripts/validate-dashboard-markup.js && python3 scripts/vpanel-agent.py"
   },
   "engines": {
     "node": ">=20"

@@ -35,6 +35,28 @@ The API surface is:
 | `POST /api/music/upload` | Upload a local audio file up to 50 MB. |
 | `DELETE /api/music/:id` | Remove a track and delete its local uploaded file when applicable. |
 
+### Pterodactyl and Java server administration
+
+BT Panel includes an optional administrator-only Pterodactyl integration view. It reads nodes, servers, and Java-capable Eggs from an existing Pterodactyl Panel and exposes guarded server power actions. Configure the connection in the server environment, not in the browser or repository:
+
+| Variable | Purpose |
+| --- | --- |
+| `PTERODACTYL_URL` | Base URL of the existing Pterodactyl Panel. |
+| `PTERODACTYL_APPLICATION_API_KEY` | Server-side application key for nodes, servers, and Eggs. |
+| `PTERODACTYL_CLIENT_API_KEY` | Optional client key for power controls and resource reads. |
+| `PTERODACTYL_TIMEOUT_MS` | Upstream request timeout; defaults to 12000 ms. |
+
+The host running Wings must be a supported Linux system with Docker and persistent storage; the BT Panel dashboard itself does not replace Wings or provide privileged Docker isolation. The integration is intentionally optional and keeps the direct-audio panel features independent.
+
+The Pterodactyl routes are administrator-only:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/pterodactyl/status` | Check whether server-side Pterodactyl configuration exists. |
+| `GET /api/pterodactyl/overview` | Read nodes, servers, Nests, and Eggs. |
+| `POST /api/pterodactyl/servers/:identifier/power` | Send a start, stop, restart, or kill signal with the configured client key. |
+| `GET /api/pterodactyl/servers/:identifier/resources` | Read client resource metrics with the configured client key. |
+
 The owner script uses `admin` and `admin@gmail.com` as convenience defaults for the owner username and email when no overrides are supplied, but it does not ship with a default password. For production or non-interactive setup, set `OWNER_USERNAME`, `OWNER_PASSWORD`, and `OWNER_EMAIL` environment variables. If `OWNER_PASSWORD` is omitted in an interactive terminal, the script prompts for it without echoing the password and asks for confirmation.
 
 Open <http://localhost:3000/>. The `/` route serves the dashboard for authenticated users and redirects signed-out visitors to `/login`. New accounts can be created at `/register`.

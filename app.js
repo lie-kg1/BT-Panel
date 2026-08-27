@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { CATEGORIES, getWallpapers } = require("./src/services/wallpaperService");
+const pterodactylService = require("./src/services/pterodactylService");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -699,6 +700,36 @@ app.delete("/api/music/:id", adminRequired, (req, res) => {
   const tracks = current.tracks.filter((candidate) => candidate.id !== track.id);
   const music = saveMusic({ ...current, tracks, selectedTrackId: current.selectedTrackId === track.id ? tracks[0]?.id || "" : current.selectedTrackId });
   res.json({ success: true, music });
+});
+
+app.get("/api/pterodactyl/status", adminRequired, (_req, res) => {
+  res.json({ success: true, pterodactyl: pterodactylService.getStatus() });
+});
+
+app.get("/api/pterodactyl/overview", adminRequired, async (_req, res) => {
+  try {
+    res.json({ success: true, pterodactyl: await pterodactylService.getOverview() });
+  } catch (error) {
+    res.status(error.status || 502).json({ success: false, message: error.message || "Pterodactyl API unavailable." });
+  }
+});
+
+app.post("/api/pterodactyl/servers/:identifier/power", adminRequired, async (req, res) => {
+  try {
+    await pterodactylService.powerServer(req.params.identifier, req.body.signal);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(error.status || 502).json({ success: false, message: error.message || "Unable to change server power state." });
+  }
+});
+
+app.get("/api/pterodactyl/servers/:identifier/resources", adminRequired, async (req, res) => {
+  try {
+    const resources = await pterodactylService.getServerResources(req.params.identifier);
+    res.json({ success: true, resources });
+  } catch (error) {
+    res.status(error.status || 502).json({ success: false, message: error.message || "Unable to read server resources." });
+  }
 });
 
 app.get("/api/media/list", adminRequired, (_req, res) => res.json({ success: true, files: listMedia() }));

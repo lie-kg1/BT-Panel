@@ -6,6 +6,7 @@ const stylesPath = path.join(__dirname, "..", "public", "css", "panel.css");
 const source = fs.readFileSync(dashboardPath, "utf8");
 const styles = fs.readFileSync(stylesPath, "utf8");
 const serverSource = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+const pterodactylServiceSource = fs.readFileSync(path.join(__dirname, "..", "src", "services", "pterodactylService.js"), "utf8");
 const root = path.join(__dirname, "..");
 const loginSource = fs.readFileSync(path.join(root, "views", "auth", "login.ejs"), "utf8");
 const authTemplatePaths = [
@@ -33,6 +34,11 @@ const requiredSnippets = [
   'function filterWallpaperLibrary',
   'id="wallpaperGrid"',
   'id="musicTrackList"',
+  'id="nav-servers"',
+  'id="view-servers"',
+  'id="pterodactylServerList"',
+  'id="pterodactylNodeList"',
+  'function loadPterodactylOverview',
   'id="musicTransportPlayBtn"',
   'id="musicMuteBtn"',
   'music-player-strip',
@@ -108,8 +114,8 @@ if (settingsSection.includes('d="M19.4 15a1.65')) {
   throw new Error("Old malformed Settings gear SVG path detected");
 }
 
-const homeToSettingsBoundary = source.match(/id="view-home"[\s\S]*?<!-- Settings View -->/)?.[0] ?? "";
-if (!homeToSettingsBoundary.includes("              </div>\n            </div>\n          </div>\n        </div>\n\n        <!-- Settings View -->")) {
+const homeToServersBoundary = source.match(/id="view-home"[\s\S]*?<!-- Game Servers View -->/)?.[0] ?? "";
+if (!homeToServersBoundary.includes("              </div>\n            </div>\n          </div>\n        </div>\n\n        <!-- Game Servers View -->")) {
   throw new Error("Home view containers are not closed before Settings view");
 }
 
@@ -210,6 +216,16 @@ for (const playbackSnippet of [
 }
 if (source.includes('(shouldPlay || musicSettings.autoplay)')) {
   throw new Error("Music autoplay must not call audio.play() during page or settings initialization");
+}
+for (const pterodactylSnippet of [
+  'app.get("/api/pterodactyl/status", adminRequired',
+  'app.get("/api/pterodactyl/overview", adminRequired',
+  'app.post("/api/pterodactyl/servers/:identifier/power", adminRequired',
+  'PTERODACTYL_APPLICATION_API_KEY',
+]) {
+  if (!serverSource.includes(pterodactylSnippet) && !source.includes(pterodactylSnippet) && !pterodactylServiceSource.includes(pterodactylSnippet)) {
+    throw new Error(`Pterodactyl integration is incomplete: ${pterodactylSnippet}`);
+  }
 }
 for (const settingsSnippet of [
   'const GENERAL_FILE = path.join(DATA_DIR, "general.json")',
