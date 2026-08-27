@@ -3054,6 +3054,7 @@
         margin-top: 18px;
       }
 
+      .music-role-note,
       .music-note {
         margin: 14px 0 0;
         color: var(--text-dim);
@@ -3234,13 +3235,12 @@
           </div>
 
           <button
-            class="nav-item admin-only"
+            class="nav-item"
             id="nav-settings"
             onclick="switchView('settings')"
             aria-label="Settings"
             role="tab"
             aria-selected="false"
-            style="display: none"
           >
             <svg
               width="128"
@@ -3885,12 +3885,12 @@
                   <div class="music-track-list" id="musicTrackList" aria-live="polite">
                     <div class="music-empty">No music tracks yet.</div>
                   </div>
-                  <div class="music-add-row">
+                  <div class="music-add-row" data-admin-only-music>
                     <input class="input" id="musicTrackName" type="text" maxlength="120" placeholder="Track name" />
                     <input class="input" id="musicTrackUrl" type="url" maxlength="1000" placeholder="https://example.com/ambient.mp3" />
                     <button class="btn btn-primary" type="button" onclick="addExternalMusicTrack()">Add URL</button>
                   </div>
-                  <div class="music-file-row">
+                  <div class="music-file-row" data-admin-only-music>
                     <input type="file" id="musicFileInput" accept="audio/*,.mp3,.wav,.ogg,.oga,.opus,.webm,.aac,.flac,.m4a" hidden onchange="uploadMusicTrack(this.files[0])" />
                     <button class="btn btn-ghost" type="button" onclick="document.getElementById('musicFileInput').click()">Upload audio</button>
                     <button class="btn btn-ghost" type="button" onclick="toggleMusicPlayback()" id="musicPlayBtn">Play selected</button>
@@ -3921,9 +3921,10 @@
                     <div class="music-volume"><input type="range" id="musicVolumeRange" min="0" max="100" value="35" oninput="updateMusicVolume(this.value)" aria-label="Music volume" /><span class="music-volume-value" id="musicVolumeValue">35%</span></div>
                   </div>
                   <div class="music-actions">
-                    <button class="btn btn-primary music-save-btn" type="button" onclick="saveMusicSettings()" id="saveMusicBtn">Save Music</button>
+                    <button class="btn btn-primary music-save-btn" type="button" onclick="saveMusicSettings()" id="saveMusicBtn" data-admin-only-music>Save Music</button>
                     <button class="btn btn-ghost" type="button" onclick="resetMusicSettings()">Reset</button>
                   </div>
+                  <p class="music-role-note" id="musicRoleNote" style="display: none">Members can adjust playback locally. Track management and saved preferences are available to administrators.</p>
                   <p class="music-note">For production, use audio you own or have permission to stream. Uploaded tracks are stored under <code>media/music/</code>.</p>
                 </section>
               </div>
@@ -4343,11 +4344,10 @@
         const teamNav = document.getElementById("nav-team");
         const settingsNav = document.getElementById("nav-settings");
         if (teamNav) teamNav.style.display = showTeam ? "" : "none";
-        if (settingsNav) settingsNav.style.display = isAdmin() ? "" : "none";
+        if (settingsNav) settingsNav.style.display = currentUser ? "" : "none";
 
         const activeView = document.querySelector(".view.active")?.id;
         if (activeView === "view-team" && !showTeam) switchView("home");
-        if (activeView === "view-settings" && !isAdmin()) switchView("home");
       }
 
       function updateNavigationSetting(setting, value) {
@@ -4472,10 +4472,6 @@
 
       function switchView(viewName, updateUrl = true) {
         // Guard restricted views
-        if (viewName === "settings" && !isAdmin()) {
-          switchView("home");
-          return;
-        }
         if (viewName === "team" && themeSettings.showTeam === false) {
           switchView("home");
           return;
@@ -4543,8 +4539,25 @@
       let barsSettingsLoaded = false;
       let barsSettings = { showAdminStats: true, showVersion: true, showRole: true, showHeaderUser: true };
 
+      function applySettingsRoleVisibility() {
+        const memberMode = Boolean(currentUser) && !isAdmin();
+        document.querySelectorAll(".settings-tab").forEach((tab) => {
+          const tabName = tab.id.replace("settings-tab-", "");
+          const allowed = !memberMode || tabName === "music";
+          tab.style.display = allowed ? "" : "none";
+          tab.setAttribute("aria-hidden", String(!allowed));
+        });
+        document.querySelectorAll("[data-admin-only-music]").forEach((element) => {
+          element.style.display = memberMode ? "none" : "";
+        });
+        const note = document.getElementById("musicRoleNote");
+        if (note) note.style.display = memberMode ? "" : "none";
+      }
+
       function switchSettingsTab(tabName) {
-        const activeTab = SETTINGS_TABS.includes(tabName) ? tabName : "appearance";
+        const requestedTab = SETTINGS_TABS.includes(tabName) ? tabName : "appearance";
+        const activeTab = !isAdmin() && requestedTab !== "music" ? "music" : requestedTab;
+        applySettingsRoleVisibility();
         document.querySelectorAll(".settings-tab").forEach((tab) => {
           const selected = tab.id === `settings-tab-${activeTab}`;
           tab.classList.toggle("active", selected);
@@ -4720,7 +4733,7 @@
       }
 
       async function loadMusicSettings() {
-        if (!isAdmin()) return;
+        if (!currentUser) return;
         try {
           const response = await apiFetch("/api/music");
           const result = await response.json();
@@ -4777,6 +4790,7 @@
           remove.setAttribute("aria-label", `Delete ${track.name || "track"}`);
           remove.textContent = "×";
           remove.addEventListener("click", () => deleteMusicTrack(track.id));
+          remove.style.display = isAdmin() ? "" : "none";
           row.append(art, select, play, remove);
           list.appendChild(row);
         });
@@ -4995,6 +5009,10 @@
       }
 
       async function addExternalMusicTrack() {
+        if (!isAdmin()) {
+          showToast("Only administrators can add music tracks.", "error");
+          return;
+        }
         const urlInput = document.getElementById("musicTrackUrl");
         const nameInput = document.getElementById("musicTrackName");
         const url = (urlInput?.value || "").trim();
@@ -5020,6 +5038,10 @@
       }
 
       async function uploadMusicTrack(file) {
+        if (!isAdmin()) {
+          showToast("Only administrators can upload music.", "error");
+          return;
+        }
         if (!file) return;
         const form = new FormData();
         form.append("file", file);
@@ -5041,6 +5063,10 @@
       }
 
       async function deleteMusicTrack(trackId) {
+        if (!isAdmin()) {
+          showToast("Only administrators can delete music tracks.", "error");
+          return;
+        }
         if (!window.confirm("Delete this music track?")) return;
         try {
           const response = await apiFetch(`/api/music/${encodeURIComponent(trackId)}`, { method: "DELETE" });
@@ -5063,6 +5089,10 @@
       }
 
       async function saveMusicSettings() {
+        if (!isAdmin()) {
+          showToast("Only administrators can save music settings.", "error");
+          return;
+        }
         const button = document.getElementById("saveMusicBtn");
         if (button) button.disabled = true;
         try {
@@ -5294,6 +5324,7 @@
             if (adminSection)
               adminSection.style.display = isAdmin() && barsSettings.showAdminStats !== false ? "" : "none";
             applyNavigationVisibility();
+            applySettingsRoleVisibility();
             // Dashboard label stays as Dashboard for all
             const homeNav = document.getElementById("nav-home");
             if (homeNav) homeNav.style.display = "";
@@ -6574,7 +6605,7 @@
         switchView(viewFromPathname(), false);
         loadGeneralSettings();
         loadBarsSettings();
-        if (isAdmin()) loadMusicSettings();
+        loadMusicSettings();
         refreshPresence();
       });
       document.addEventListener("visibilitychange", () => {

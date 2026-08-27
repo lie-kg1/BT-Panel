@@ -652,7 +652,7 @@ app.post("/api/bars", adminRequired, (req, res) => {
   res.json({ success: true, bars });
 });
 
-app.get("/api/music", adminRequired, (_req, res) => {
+app.get("/api/music", authRequired, (_req, res) => {
   res.json({ success: true, music: loadMusic() });
 });
 

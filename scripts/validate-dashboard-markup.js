@@ -178,7 +178,7 @@ for (const emailAuthSnippet of [
 }
 for (const musicSnippet of [
   'const MUSIC_FILE = path.join(DATA_DIR, "music.json")',
-  'app.get("/api/music", adminRequired',
+  'app.get("/api/music", authRequired',
   'app.post("/api/music/track", adminRequired',
   'app.post("/api/music/upload", adminRequired',
   'app.delete("/api/music/:id", adminRequired',
