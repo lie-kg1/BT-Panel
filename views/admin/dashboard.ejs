@@ -2716,6 +2716,39 @@
         stroke-linejoin: round;
       }
 
+      .music-progress-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 180px;
+        max-width: 320px;
+        flex: 1;
+      }
+
+      .music-progress {
+        width: 100%;
+        min-width: 80px;
+        height: 4px;
+        accent-color: var(--accent);
+        cursor: pointer;
+      }
+
+      .music-progress:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .music-time {
+        display: flex;
+        justify-content: flex-end;
+        gap: 3px;
+        min-width: 68px;
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        white-space: nowrap;
+      }
+
       .music-transport-btn {
         display: inline-grid;
         width: 34px;
@@ -2971,6 +3004,13 @@
       @media (max-width: 600px) {
         .music-player-strip {
           justify-content: space-between;
+          flex-wrap: wrap;
+        }
+
+        .music-progress-group {
+          order: 5;
+          width: 100%;
+          max-width: none;
         }
 
         .music-transport-btn {
@@ -3788,6 +3828,10 @@
                     <button class="music-transport-btn primary" type="button" onclick="toggleMusicPlayback()" id="musicTransportPlayBtn" aria-label="Play selected track" title="Play selected track"><svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7z"></path></svg></button>
                     <button class="music-transport-btn" type="button" onclick="skipMusicTrack(1)" aria-label="Next track" title="Next track"><svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6v12l9-6zM18 5v14"></path></svg></button>
                     <button class="music-transport-btn" type="button" onclick="toggleMusicMute()" id="musicMuteBtn" aria-label="Mute music" title="Mute music"><svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"></path><path d="m17 9 4 6m0-6-4 6"></path></svg></button>
+                    <div class="music-progress-group">
+                      <input class="music-progress" id="musicSeekRange" type="range" min="0" max="0" step="0.1" value="0" disabled oninput="seekMusicTrack(this.value)" aria-label="Track progress" />
+                      <div class="music-time" aria-live="polite"><span id="musicCurrentTime">0:00</span><span>/</span><span id="musicDuration">0:00</span></div>
+                    </div>
                   </div>
                   <div class="music-track-list" id="musicTrackList" aria-live="polite">
                     <div class="music-empty">No music tracks yet.</div>
@@ -3834,7 +3878,7 @@
                   <p class="music-note">For production, use audio you own or have permission to stream. Uploaded tracks are stored under <code>media/music/</code>.</p>
                 </section>
               </div>
-              <audio id="musicAudio" preload="metadata" onplay="syncMusicControls()" onpause="syncMusicControls()" onended="syncMusicControls()" onvolumechange="syncMusicControls()"></audio>
+              <audio id="musicAudio" preload="metadata" onplay="syncMusicControls()" onpause="syncMusicControls()" onended="syncMusicControls()" onvolumechange="syncMusicControls()" ontimeupdate="syncMusicControls()" onloadedmetadata="syncMusicControls()"></audio>
             </div>
           </div>
         </section>
@@ -4692,6 +4736,19 @@
       const MUSIC_ICON_VOLUME = '<svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"></path><path d="M17 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12" fill="none"></path></svg>';
       const MUSIC_ICON_MUTED = '<svg class="music-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"></path><path d="m17 9 4 6m0-6-4 6" fill="none"></path></svg>';
 
+      function formatMusicTime(seconds) {
+        const total = Number.isFinite(Number(seconds)) && Number(seconds) > 0 ? Math.floor(Number(seconds)) : 0;
+        return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+      }
+
+      function seekMusicTrack(value) {
+        const audio = document.getElementById("musicAudio");
+        const nextTime = Number(value);
+        if (!audio || !Number.isFinite(nextTime) || !Number.isFinite(audio.duration)) return;
+        audio.currentTime = Math.min(Math.max(nextTime, 0), audio.duration);
+        syncMusicControls();
+      }
+
       function syncMusicControls() {
         const enabled = document.getElementById("musicEnabledToggle");
         const autoplay = document.getElementById("musicAutoplayToggle");
@@ -4705,6 +4762,18 @@
         const volumeLabel = document.getElementById("musicVolumeValue");
         if (volumeLabel) volumeLabel.textContent = `${value}%`;
         const audio = document.getElementById("musicAudio");
+        const currentTime = Number.isFinite(audio?.currentTime) ? audio.currentTime : 0;
+        const duration = Number.isFinite(audio?.duration) ? audio.duration : 0;
+        const seekRange = document.getElementById("musicSeekRange");
+        const currentTimeLabel = document.getElementById("musicCurrentTime");
+        const durationLabel = document.getElementById("musicDuration");
+        if (seekRange) {
+          seekRange.max = String(duration);
+          seekRange.value = String(Math.min(currentTime, duration || 0));
+          seekRange.disabled = duration <= 0;
+        }
+        if (currentTimeLabel) currentTimeLabel.textContent = formatMusicTime(currentTime);
+        if (durationLabel) durationLabel.textContent = formatMusicTime(duration);
         const playing = audio && !audio.paused && !audio.ended;
         const playButton = document.getElementById("musicPlayBtn");
         const transportPlayButton = document.getElementById("musicTransportPlayBtn");
