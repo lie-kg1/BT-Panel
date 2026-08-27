@@ -478,7 +478,7 @@ app.get("/home", (req, res) => {
   if (!currentUser(req)) return res.redirect("/login");
   res.redirect("/");
 });
-app.get(["/team", "/settings", "/users", "/account"], (req, res) => {
+app.get(["/team", "/settings", "/users", "/account", "/servers", "/servers/"], (req, res) => {
   if (!currentUser(req)) return res.redirect("/login");
   res.render("admin/dashboard");
 });
