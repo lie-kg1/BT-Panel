@@ -35,28 +35,6 @@ The API surface is:
 | `POST /api/music/upload` | Upload a local audio file up to 50 MB. |
 | `DELETE /api/music/:id` | Remove a track and delete its local uploaded file when applicable. |
 
-### Pterodactyl and Java server administration
-
-BT Panel includes an optional administrator-only Pterodactyl integration view. It reads nodes, servers, and Java-capable Eggs from an existing Pterodactyl Panel and exposes guarded server power actions. Configure the connection in the server environment, not in the browser or repository:
-
-| Variable | Purpose |
-| --- | --- |
-| `PTERODACTYL_URL` | Base URL of the existing Pterodactyl Panel. |
-| `PTERODACTYL_APPLICATION_API_KEY` | Server-side application key for nodes, servers, and Eggs. |
-| `PTERODACTYL_CLIENT_API_KEY` | Optional client key for power controls and resource reads. |
-| `PTERODACTYL_TIMEOUT_MS` | Upstream request timeout; defaults to 12000 ms. |
-
-The host running Wings must be a supported Linux system with Docker and persistent storage; the BT Panel dashboard itself does not replace Wings or provide privileged Docker isolation. The integration is intentionally optional and keeps the direct-audio panel features independent.
-
-The Pterodactyl routes are administrator-only:
-
-| Endpoint | Purpose |
-| --- | --- |
-| `GET /api/pterodactyl/status` | Check whether server-side Pterodactyl configuration exists. |
-| `GET /api/pterodactyl/overview` | Read nodes, servers, Nests, and Eggs. |
-| `POST /api/pterodactyl/servers/:identifier/power` | Send a start, stop, restart, or kill signal with the configured client key. |
-| `GET /api/pterodactyl/servers/:identifier/resources` | Read client resource metrics with the configured client key. |
-
 The owner script uses `admin` and `admin@gmail.com` as convenience defaults for the owner username and email when no overrides are supplied, but it does not ship with a default password. For production or non-interactive setup, set `OWNER_USERNAME`, `OWNER_PASSWORD`, and `OWNER_EMAIL` environment variables. If `OWNER_PASSWORD` is omitted in an interactive terminal, the script prompts for it without echoing the password and asks for confirmation.
 
 Open <http://localhost:3000/>. The `/` route serves the dashboard for authenticated users and redirects signed-out visitors to `/login`. New accounts can be created at `/register`.
@@ -64,18 +42,6 @@ Open <http://localhost:3000/>. The `/` route serves the dashboard for authentica
 ### Troubleshooting menu launch
 
 If you see `BASH_SOURCE[0]: unbound variable`, use the latest `menu.sh` and launch it with the direct command shown above. The launcher now handles execution through `bash -c` safely. If npm reports that `package.json` or a menu script cannot be found, the command was started outside the BT Panel directory; run `cd /path/to/BT-Panel` first. Do not append `7` to the shell command. Enter `7` only after the menu is displayed.
-
-### Pterodactyl Panel and Wings installers
-
-The repository includes guarded host installers for the official Pterodactyl Panel and Wings node daemon. These commands are intended for a supported Debian/Ubuntu Linux VPS, not CodeSandbox or a normal shared web host. They install system packages and services, so review the scripts and run them only on a dedicated host where you have root access.
-
-| Command | Result |
-| --- | --- |
-| `PTERODACTYL_INSTALL_CONFIRM=YES sudo ./install.sh --pterodactyl-panel` | Installs Panel dependencies and downloads the Panel release into `/var/www/pterodactyl`. |
-| `WINGS_INSTALL_CONFIRM=YES sudo ./install.sh --wings` | Installs Docker and Wings, creates the `wings.service` unit, and waits for Panel-generated `config.yml`. |
-| `PTERODACTYL_INSTALL_CONFIRM=YES WINGS_INSTALL_CONFIRM=YES sudo ./install.sh --pterodactyl` | Runs both guarded installers in sequence. |
-
-The interactive `./menu.sh` exposes the same options. The Panel installer deliberately stops before database, application-key, TLS, and queue configuration. On Ubuntu 22.04, where PHP 8.3 is not in the default repositories, it enables the documented `ondrej/php` repository; on other supported systems it uses an available PHP 8.2/8.3 package or stops with a clear error. The Wings installer deliberately does not invent a node configuration: create the node in Pterodactyl Panel, copy the generated configuration to `/etc/pterodactyl/config.yml`, test with `wings --debug`, and only then enable the service. See the [official Panel guide](https://pterodactyl.io/panel/1.0/getting_started.html) and [official Wings guide](https://pterodactyl.io/wings/1.0/installing.html).
 
 ## Configuration
 

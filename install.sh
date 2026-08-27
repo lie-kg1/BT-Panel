@@ -32,14 +32,11 @@ cd "$ROOT_DIR"
 
 usage() {
   cat <<'USAGE'
-Usage: ./install.sh [option]
+Usage: ./install.sh [--check]
 
 Install or verify Node.js 20+, npm dependencies, and BT Panel runtime directories.
 
-  --check                 Verify the runtime without installing or changing anything.
-  --pterodactyl-panel     Install official Pterodactyl Panel dependencies and files.
-  --wings                 Install Docker and the Pterodactyl Wings node daemon.
-  --pterodactyl            Run both installers with their explicit confirmations.
+  --check   Verify the runtime without installing or changing anything.
   -h, --help
 USAGE
 }
@@ -116,19 +113,6 @@ verify_runtime() {
 }
 
 case "${1:-}" in
-  --pterodactyl-panel)
-    PTERODACTYL_INSTALL_CONFIRM="${PTERODACTYL_INSTALL_CONFIRM:-}" bash "$ROOT_DIR/scripts/install-pterodactyl-panel.sh"
-    exit 0
-    ;;
-  --wings)
-    WINGS_INSTALL_CONFIRM="${WINGS_INSTALL_CONFIRM:-}" bash "$ROOT_DIR/scripts/install-wings.sh"
-    exit 0
-    ;;
-  --pterodactyl)
-    PTERODACTYL_INSTALL_CONFIRM="${PTERODACTYL_INSTALL_CONFIRM:-}" bash "$ROOT_DIR/scripts/install-pterodactyl-panel.sh"
-    WINGS_INSTALL_CONFIRM="${WINGS_INSTALL_CONFIRM:-}" bash "$ROOT_DIR/scripts/install-wings.sh"
-    exit 0
-    ;;
   "") ;;
   --check)
     verify_runtime
@@ -155,7 +139,7 @@ else
   npm install
 fi
 
-chmod +x "$ROOT_DIR/install.sh" "$ROOT_DIR/owner.sh" "$ROOT_DIR/menu.sh" "$ROOT_DIR/scripts/install-pterodactyl-panel.sh" "$ROOT_DIR/scripts/install-wings.sh"
+chmod +x "$ROOT_DIR/install.sh" "$ROOT_DIR/owner.sh" "$ROOT_DIR/menu.sh"
 
 if [[ ! -f "$ROOT_DIR/data/users.json" ]]; then
   printf '{"__version__":2,"users":[]}\n' > "$ROOT_DIR/data/users.json"
