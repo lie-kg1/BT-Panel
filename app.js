@@ -7,7 +7,7 @@ const multer = require("multer");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const { CATEGORIES, getWallpapers } = require("./wallpaperService");
+const { CATEGORIES, getWallpapers } = require("./src/services/wallpaperService");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
