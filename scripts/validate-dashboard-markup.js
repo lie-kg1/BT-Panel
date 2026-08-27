@@ -19,7 +19,7 @@ const requiredSnippets = [
   'aria-label="${user.online ? "Online" : "Offline"}"></span>',
   'id="nav-settings"',
   'id="nav-music"',
-  'Music Dashboard',
+  '<span class="nav-label">Music</span>',
   'd="M12.22 2h-.44a2 2 0 0 0-2 2v.18',
   'function renderTeamList()',
   'function renderUsersList()',
