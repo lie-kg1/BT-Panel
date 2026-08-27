@@ -20,9 +20,13 @@ else
   RESET=""
 fi
 
-info() { printf '%b%s%b\n' "$CYAN" "$*" "$RESET"; }
-success() { printf '%b%s%b\n' "$GREEN" "$*" "$RESET"; }
-warn() { printf '%b%s%b\n' "$YELLOW" "$*" "$RESET" >&2; }
+INFO_ICON='ℹ️'
+SUCCESS_ICON='✅'
+WARN_ICON='⚠️'
+
+info() { printf '%b%s %s%b\n' "$CYAN" "$INFO_ICON" "$*" "$RESET"; }
+success() { printf '%b%s %s%b\n' "$GREEN" "$SUCCESS_ICON" "$*" "$RESET"; }
+warn() { printf '%b%s %s%b\n' "$YELLOW" "$WARN_ICON" "$*" "$RESET" >&2; }
 
 cd "$ROOT_DIR"
 
@@ -142,9 +146,9 @@ if [[ ! -f "$ROOT_DIR/data/users.json" ]]; then
   chmod 600 "$ROOT_DIR/data/users.json"
 fi
 
-printf '\\n%bBT Panel installation completed.%b\\n\\n' "$GREEN" "$RESET"
-printf '%bNext steps:%b\\n' "$BLUE" "$RESET"
-printf '  %b1.%b Run ./owner.sh to create or update the owner account.\\n' "$CYAN" "$RESET"
-printf '  %b2.%b Run ./menu.sh for the interactive launcher, or run npm start directly.\\n' "$CYAN" "$RESET"
-printf '  %b3.%b Open http://127.0.0.1:3000/\\n' "$CYAN" "$RESET"
-printf '\\n%bSet a strong SESSION_SECRET in .env before using the panel outside local development.%b\\n' "$YELLOW" "$RESET"
+printf '\n%b%s BT Panel installation completed.%b\n\n' "$GREEN" "$SUCCESS_ICON" "$RESET"
+printf '%b%s Next steps:%b\n' "$BLUE" "$INFO_ICON" "$RESET"
+printf '  %b🔹 1.%b Run ./owner.sh to create or update the owner account.\n' "$CYAN" "$RESET"
+printf '  %b🔹 2.%b Run ./menu.sh for the interactive launcher, or run npm start directly.\n' "$CYAN" "$RESET"
+printf '  %b🔹 3.%b Open http://127.0.0.1:3000/\n' "$CYAN" "$RESET"
+printf '\n%b%s Set a strong SESSION_SECRET in .env before using the panel outside local development.%b\n' "$YELLOW" "$WARN_ICON" "$RESET"

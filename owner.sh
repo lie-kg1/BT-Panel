@@ -20,9 +20,13 @@ else
   RESET=""
 fi
 
-info() { printf '%b%s%b\n' "$CYAN" "$*" "$RESET"; }
-success() { printf '%b%s%b\n' "$GREEN" "$*" "$RESET"; }
-error() { printf '%b%s%b\n' "$RED" "$*" "$RESET" >&2; }
+INFO_ICON='ℹ️'
+SUCCESS_ICON='✅'
+ERROR_ICON='❌'
+
+info() { printf '%b%s %s%b\n' "$CYAN" "$INFO_ICON" "$*" "$RESET"; }
+success() { printf '%b%s %s%b\n' "$GREEN" "$SUCCESS_ICON" "$*" "$RESET"; }
+error() { printf '%b%s %s%b\n' "$RED" "$ERROR_ICON" "$*" "$RESET" >&2; }
 
 usage() {
   cat <<'USAGE'
@@ -57,7 +61,7 @@ if command -v node >/dev/null 2>&1; then
 fi
 
 if [[ "$runtime_ready" != true ]]; then
-  info "Node.js 20+ or project dependencies are missing; running ./install.sh..."
+  info "🔧 Node.js 20+ or project dependencies are missing; running ./install.sh..."
   bash "$ROOT_DIR/install.sh"
 fi
 
@@ -74,15 +78,15 @@ fi
 
 username="${OWNER_USERNAME:-admin}"
 if [[ -z "${OWNER_USERNAME+x}" && -t 0 ]]; then
-  read -r -p "${CYAN}Owner username [admin]: ${RESET}" entered_username
+  read -r -p "${CYAN}👤 Owner username [admin]: ${RESET}" entered_username
   username="${entered_username:-$username}"
 fi
 
 password="${OWNER_PASSWORD:-}"
 if [[ -z "$password" && -t 0 ]]; then
-  read -r -s -p "${CYAN}Owner password (minimum 8 characters): ${RESET}" password
+  read -r -s -p "${CYAN}🔐 Owner password (minimum 8 characters): ${RESET}" password
   printf '\n'
-  read -r -s -p "${CYAN}Confirm owner password: ${RESET}" password_confirmation
+  read -r -s -p "${CYAN}🔐 Confirm owner password: ${RESET}" password_confirmation
   printf '\n'
   [[ "$password" == "$password_confirmation" ]] || {
     error "Error: passwords do not match."
@@ -92,7 +96,7 @@ fi
 
 email="${OWNER_EMAIL:-admin@gmail.com}"
 if [[ -z "${OWNER_EMAIL+x}" && -t 0 ]]; then
-  read -r -p "${CYAN}Owner email [admin@gmail.com]: ${RESET}" entered_email
+  read -r -p "${CYAN}✉️ Owner email [admin@gmail.com]: ${RESET}" entered_email
   email="${entered_email:-$email}"
 fi
 
@@ -126,7 +130,7 @@ if (fs.existsSync(usersFile)) {
   try {
     data = JSON.parse(fs.readFileSync(usersFile, "utf8"));
   } catch (error) {
-    console.error(`\x1b[31mError: could not parse ${usersFile}: ${error.message}\x1b[0m`);
+    console.error(`\x1b[31m❌ Error: could not parse ${usersFile}: ${error.message}\x1b[0m`);
     process.exit(1);
   }
 }
@@ -164,5 +168,5 @@ fs.mkdirSync(path.dirname(usersFile), { recursive: true });
 fs.writeFileSync(tempFile, `${JSON.stringify({ __version__: 2, users: data.users }, null, 2)}\n`, { mode: 0o600 });
 fs.chmodSync(tempFile, 0o600);
 fs.renameSync(tempFile, usersFile);
-console.log(`\x1b[32mOwner account ${existing ? "updated" : "created"}: ${username}\x1b[0m`);
+console.log(`\x1b[32m✅ Owner account ${existing ? "updated" : "created"}: ${username}\x1b[0m`);
 NODE

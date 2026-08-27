@@ -27,9 +27,13 @@ else
   RESET=""
 fi
 
-info() { printf '%b%s%b\n' "$CYAN" "$*" "$RESET"; }
-success() { printf '%b%s%b\n' "$GREEN" "$*" "$RESET"; }
-error() { printf '%b%s%b\n' "$RED" "$*" "$RESET" >&2; }
+INFO_ICON='ℹ️'
+SUCCESS_ICON='✅'
+ERROR_ICON='❌'
+
+info() { printf '%b%s %s%b\n' "$CYAN" "$INFO_ICON" "$*" "$RESET"; }
+success() { printf '%b%s %s%b\n' "$GREEN" "$SUCCESS_ICON" "$*" "$RESET"; }
+error() { printf '%b%s %s%b\n' "$RED" "$ERROR_ICON" "$*" "$RESET" >&2; }
 
 usage() {
   cat <<'USAGE'
@@ -52,7 +56,7 @@ if [[ $# -gt 0 ]]; then
 fi
 
 pause() {
-  read -r -p "${CYAN}Press Enter to continue...${RESET}" _ || true
+  read -r -p "${CYAN}⏎ Press Enter to continue...${RESET}" _ || true
 }
 
 require_project() {
@@ -65,21 +69,21 @@ require_project() {
 
 show_menu() {
   printf '\n%b%s%b\n' "$BLUE" '========================================' "$RESET"
-  printf '%b%s%b\n' "$GREEN" '              BT PANEL MENU' "$RESET"
+  printf '%b%s%b\n' "$GREEN" '              🚀 BT PANEL MENU' "$RESET"
   printf '%b%s%b\n' "$BLUE" '========================================' "$RESET"
-  printf '%b%s%b\n' "$CYAN" '1) Install or update dependencies' "$RESET"
-  printf '%b%s%b\n' "$CYAN" '2) Create or update owner account' "$RESET"
-  printf '%b%s%b\n' "$CYAN" '3) Build project' "$RESET"
-  printf '%b%s%b\n' "$CYAN" '4) Run project checks' "$RESET"
-  printf '%b%s%b\n' "$CYAN" '5) Start production server' "$RESET"
-  printf '%b%s%b\n' "$CYAN" '6) Start development server' "$RESET"
-  printf '%b%s%b\n' "$YELLOW" '7) Exit' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 1) Install or update dependencies' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 2) Create or update owner account' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 3) Build project' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 4) Run project checks' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 5) Start production server' "$RESET"
+  printf '%b%s%b\n' "$CYAN" '🔹 6) Start development server' "$RESET"
+  printf '%b%s%b\n' "$YELLOW" '🔹 7) Exit' "$RESET"
   printf '%b%s%b\n' "$BLUE" '========================================' "$RESET"
 }
 
 while true; do
   show_menu
-  read -r -p "${CYAN}Choose an option [1-7]: ${RESET}" choice || {
+  read -r -p "${CYAN}👉 Choose an option [1-7]: ${RESET}" choice || {
     printf '\n'
     info 'Exiting.'
     exit 0
