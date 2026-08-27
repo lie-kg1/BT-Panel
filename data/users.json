@@ -1,0 +1,21 @@
+{
+  "__version__": 2,
+  "users": [
+    {
+      "id": "c0ce63c6-d99e-4302-a328-1be17291fb7b",
+      "username": "admin",
+      "passwordHash": "$2a$10$HHaXTRNjs3tF29pI7aqs9.5U0uy7KpNYpcmd2eq9omBdlBKloFRiW",
+      "role": "owner",
+      "status": "active",
+      "createdAt": 1787779068270,
+      "lastLogin": {
+        "ip": "10.0.0.2",
+        "device": "Desktop",
+        "ts": 1787779085693
+      },
+      "profilePic": "",
+      "email": "admin@gmail.com",
+      "bio": ""
+    }
+  ]
+}
