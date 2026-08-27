@@ -10,26 +10,18 @@
     "build": "node scripts/build.js",
     "createuser": "node scripts/createuser.js",
     "lint": "node scripts/build.js --check",
-    "check": "node --check app.js && node --check src/services/wallpaperService.js && node --check src/services/serverManager.js && node --check public/js/panel.js && node --check src/app.js && node --check src/server.js && node scripts/validate-dashboard-markup.js && python3 scripts/vpanel-agent.py"
+    "check": "node --check app.js && node --check src/services/wallpaperService.js && node --check public/js/panel.js && node --check src/app.js && node --check src/server.js && node scripts/validate-dashboard-markup.js && python3 scripts/vpanel-agent.py"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "archiver": "^8.0.0",
-    "axios": "^1.20.0",
     "bcryptjs": "^2.4.3",
-    "dockerode": "^5.0.1",
     "dotenv": "^16.6.1",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
-    "extract-zip": "^2.0.1",
     "multer": "^1.4.5-lts.1",
     "socket.io": "^4.7.5"
-  },
-  "devDependencies": {
-    "@types/archiver": "^8.0.0",
-    "@types/dockerode": "^4.0.1"
   }
 }
